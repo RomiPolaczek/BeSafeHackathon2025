@@ -1,0 +1,16 @@
+name: PR Validation
+
+on: [pull_request, workflow_dispatch]
+
+jobs:
+  client:
+    uses: ./.github/workflows/reusable-test-npm.yml
+    with:
+      folder: ./client
+      npm-command: build
+  
+  server:
+    uses: ./.github/workflows/reusable-test-npm.yml
+    with:
+      folder: ./server
+      npm-command: lint
