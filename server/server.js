@@ -1,29 +1,102 @@
-import express from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import rubberDuckRoutes from './routes/rubberDucks.js'; // Import the routes
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-dotenv.config();
+// server.js
+const express = require('express');
+const http = require('http');
+const socketIo = require('socket.io');
+const multer = require('multer');
+const path = require('path');
 
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
 
-app.use(express.json());
-app.use('/images', express.static(path.join(__dirname, 'images'))); // Serve static images
+app.use(express.static('build'));
 
-app.use(cors({
-  origin: process.env.CLIENT_URL
-}));
+// Set up multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public/uploads/')
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname))
+  }
+});
 
-// Use the routes file for all `/ducks` routes
-app.use('/ducks', rubberDuckRoutes);
+const upload = multer({ storage: storage });
 
-// Start server
-const PORT = process.env.PORT;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+// File upload route
+app.post('/upload', upload.single('file'), (req, res) => {
+  if (req.file) {
+    res.json({ filename: req.file.filename });
+  } else {
+    res.status(400).send('No file uploaded.');
+  }
+});
+
+const users = new Map();
+const messageHistory = [];
+
+io.on('connection', (socket) => {
+  console.log('A user connected');
+
+  socket.on('set username', (username) => {
+    users.set(socket.id, { username, lastSeen: new Date() });
+    socket.emit('username set', username);
+    io.emit('user joined', { userId: socket.id, username });
+    
+    // Send message history to the newly connected user
+    socket.emit('message history', messageHistory);
+  });
+
+  socket.on('chat message', (msg) => {
+    const user = users.get(socket.id);
+    if (user) {
+      const messageWithUser = { ...msg, username: user.username, timestamp: new Date() };
+      messageHistory.push(messageWithUser);
+      io.emit('chat message', messageWithUser);
+      updateLastSeen(socket.id);
+    }
+  });
+
+  socket.on('typing', () => {
+    const user = users.get(socket.id);
+    if (user) {
+      socket.broadcast.emit('user typing', { userId: socket.id, username: user.username });
+      updateLastSeen(socket.id);
+    }
+  });
+
+  socket.on('stop typing', () => {
+    const user = users.get(socket.id);
+    if (user) {node 
+      socket.broadcast.emit('user stop typing', { userId: socket.id, username: user.username });
+      updateLastSeen(socket.id);
+    }
+  });
+
+  socket.on('disconnect', () => {
+    const user = users.get(socket.id);
+    if (user) {
+      console.log('User disconnected:', user.username);
+      io.emit('user disconnected', { userId: socket.id, username: user.username });
+      users.delete(socket.id);
+    }
+  });
+});
+
+function updateLastSeen(userId) {
+  if (users.has(userId)) {
+    const user = users.get(userId);
+    user.lastSeen = new Date();
+    io.emit('last seen update', { userId, username: user.username, lastSeen: user.lastSeen });
+  }
+}
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
