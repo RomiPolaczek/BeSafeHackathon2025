@@ -19,61 +19,64 @@ const io = new Server(server, {
 app.use(express.static(path.join(__dirname, '../client/build')));
 
 const users = new Map();
-const messageHistory = [];
+const messageHistory = new Map();
 
 io.on('connection', (socket) => {
-  console.log('A user connected');
+  console.log('New connection. Socket ID:', socket.id);
 
-  socket.on('set username', (username) => {
+  socket.on('join chat', ({ username, chatId }) => {
+    console.log(`User ${username} joining chat ${chatId}`);
+    socket.join(chatId);
     users.set(socket.id, { username, lastSeen: new Date() });
-    socket.emit('username set', username);
-    io.emit('user joined', { userId: socket.id, username });
-    socket.emit('message history', messageHistory);
+    io.to(chatId).emit('user joined', { userId: socket.id, username, chatId });
+    if (!messageHistory.has(chatId)) {
+      messageHistory.set(chatId, []);
+    }
+    socket.emit('message history', messageHistory.get(chatId));
   });
 
-  socket.on('chat message', (msg) => {
+  socket.on('chat message', (msg, callback) => {
+    console.log('Received chat message:', msg);
     const user = users.get(socket.id);
     if (user) {
       const messageWithUser = { ...msg, username: user.username, timestamp: new Date() };
-      messageHistory.push(messageWithUser);
-      io.emit('chat message', messageWithUser);
-      updateLastSeen(socket.id);
+      if (!messageHistory.has(msg.chatId)) {
+        messageHistory.set(msg.chatId, []);
+      }
+      messageHistory.get(msg.chatId).push(messageWithUser);
+      console.log('Broadcasting message to room:', msg.chatId, messageWithUser);
+      socket.to(msg.chatId).emit('chat message', messageWithUser);
+      if (callback) {
+        console.log('Calling callback for message:', messageWithUser);
+        callback(null, messageWithUser);
+      }
+    } else {
+      console.error('User not found for socket ID:', socket.id);
+      if (callback) callback('User not found');
     }
   });
 
-  socket.on('typing', () => {
-    const user = users.get(socket.id);
-    if (user) {
-      socket.broadcast.emit('user typing', { userId: socket.id, username: user.username });
-      updateLastSeen(socket.id);
-    }
+  socket.on('typing', ({ username, chatId }) => {
+    console.log(`User ${username} is typing in chat ${chatId}`);
+    socket.to(chatId).emit('typing', { userId: socket.id, username, chatId });
   });
 
-  socket.on('stop typing', () => {
-    const user = users.get(socket.id);
-    if (user) {
-      socket.broadcast.emit('user stop typing', { userId: socket.id, username: user.username });
-      updateLastSeen(socket.id);
-    }
+  socket.on('stop typing', ({ username, chatId }) => {
+    console.log(`User ${username} stopped typing in chat ${chatId}`);
+    socket.to(chatId).emit('stop typing', { userId: socket.id, chatId });
   });
 
   socket.on('disconnect', () => {
     const user = users.get(socket.id);
     if (user) {
-      console.log('User disconnected:', user.username);
+      console.log('User disconnected:', user.username, 'Socket ID:', socket.id);
       io.emit('user disconnected', { userId: socket.id, username: user.username });
       users.delete(socket.id);
+    } else {
+      console.log('Unknown user disconnected. Socket ID:', socket.id);
     }
   });
 });
-
-function updateLastSeen(userId) {
-  if (users.has(userId)) {
-    const user = users.get(userId);
-    user.lastSeen = new Date();
-    io.emit('last seen update', { userId, username: user.username, lastSeen: user.lastSeen });
-  }
-}
 
 const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => {

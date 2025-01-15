@@ -1,19 +1,50 @@
 import React from 'react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
+import { theme } from '../styles/theme';
 
 const TypingIndicatorContainer = styled.div`
-  padding: 0.5rem 1rem;
+  padding: ${theme.spacing.small} ${theme.spacing.medium};
   font-style: italic;
-  color: var(--light-text-color);
+  color: ${theme.colors.lightText};
+  display: flex;
+  align-items: center;
 `;
 
-const TypingIndicator = ({ typingUsers }) => {
-  if (Object.keys(typingUsers).length === 0) return null;
+const bounce = keyframes`
+  0%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-6px); }
+`;
 
-  const typingUsernames = Object.values(typingUsers).join(', ');
+const Dot = styled.span`
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: ${theme.colors.lightText};
+  margin: 0 2px;
+  animation: ${bounce} 1.4s infinite ease-in-out;
+  animation-delay: ${props => props.$delay}s;
+`;
+
+const getTypingMessage = (typingUsernames) => {
+  if (typingUsernames.length === 0) return null;
+  if (typingUsernames.length === 1) return `${typingUsernames[0]} is typing`;
+  if (typingUsernames.length === 2) return `${typingUsernames[0]} and ${typingUsernames[1]} are typing`;
+  return `${typingUsernames.length} users are typing`;
+};
+
+const TypingIndicator = ({ typingUsers }) => {
+  const typingUsernames = Object.values(typingUsers);
+  const typingMessage = getTypingMessage(typingUsernames);
+
+  if (!typingMessage) return null;
+
   return (
-    <TypingIndicatorContainer>
-      {typingUsernames} {Object.keys(typingUsers).length === 1 ? 'is' : 'are'} typing...
+    <TypingIndicatorContainer aria-live="polite" aria-atomic="true">
+      {typingMessage}
+      <Dot $delay={0} aria-hidden="true" />
+      <Dot $delay={0.2} aria-hidden="true" />
+      <Dot $delay={0.4} aria-hidden="true" />
     </TypingIndicatorContainer>
   );
 };

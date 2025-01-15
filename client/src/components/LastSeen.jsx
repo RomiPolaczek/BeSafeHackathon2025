@@ -1,4 +1,3 @@
-// components/LastSeen.js
 import React from 'react';
 
 function LastSeen({ lastSeen }) {
