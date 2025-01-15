@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import styled from 'styled-components';
-import { theme } from '../styles/theme';
+import { theme } from '../assets/styles/theme';
 
 const InputContainer = styled.form`
   display: flex;
@@ -43,7 +43,12 @@ const SendButton = styled.button`
   }
 `;
 
-const MessageInput = ({ onSendMessage, onTyping, isConnected }) => {
+const ButtonContainer = styled.div`
+  display: flex;
+  gap: ${theme.spacing.small};
+`;
+
+const MessageInput = ({ onSendMessage, onTyping, isConnected, onShowAllMessages }) => {
   const [inputMessage, setInputMessage] = useState('');
   const typingTimeoutRef = useRef(null);
 
@@ -81,13 +86,23 @@ const MessageInput = ({ onSendMessage, onTyping, isConnected }) => {
         disabled={!isConnected}
         aria-label="Type a message"
       />
-      <SendButton 
-        type="submit" 
-        disabled={!inputMessage.trim() || !isConnected}
-        aria-label="Send message"
-      >
-        Send
-      </SendButton>
+      <ButtonContainer>
+        <SendButton 
+          type="submit" 
+          disabled={!inputMessage.trim() || !isConnected}
+          aria-label="Send message"
+        >
+          Send
+        </SendButton>
+        <SendButton 
+          type="button" 
+          onClick={onShowAllMessages}
+          disabled={!isConnected}
+          aria-label="Show all messages"
+        >
+          Show All
+        </SendButton>
+      </ButtonContainer>
     </InputContainer>
   );
 };

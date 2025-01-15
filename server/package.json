@@ -1,6 +1,7 @@
 {
   "name": "safe-chat-server",
   "version": "1.0.0",
+  "description": "Server for Safe Chat application",
   "type": "module",
   "main": "server.js",
   "scripts": {

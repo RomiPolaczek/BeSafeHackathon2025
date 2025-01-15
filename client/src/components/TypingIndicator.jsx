@@ -1,6 +1,6 @@
 import React from 'react';
 import styled, { keyframes } from 'styled-components';
-import { theme } from '../styles/theme';
+import { theme } from '../assets/styles/theme';
 
 const TypingIndicatorContainer = styled.div`
   padding: ${theme.spacing.small} ${theme.spacing.medium};

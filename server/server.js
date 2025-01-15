@@ -49,14 +49,9 @@ io.on('connection', (socket) => {
     users.set(socket.id, { username, lastSeen: new Date() });
     io.to(chatId).emit('user joined', { userId: socket.id, username, chatId });
     
-    if (!messageHistory.has(chatId)) {
-      messageHistory.set(chatId, []);
-    }
-    
-    const chatHistory = messageHistory.get(chatId);
-    console.log(`Sending chat history for chat ${chatId}. Total messages: ${chatHistory.length}`);
-    
-    socket.emit('message history', chatHistory);
+    // Send message history for this chat
+    const chatMessages = messageHistory.get(chatId) || [];
+    socket.emit('message history', chatMessages);
   });
 
   socket.on('chat message', (msg, callback) => {
@@ -71,6 +66,7 @@ io.on('connection', (socket) => {
         priority: msg.priority || 'normal',
         read: false
       };
+
       if (!messageHistory.has(msg.chatId)) {
         messageHistory.set(msg.chatId, []);
       }
@@ -83,13 +79,11 @@ io.on('connection', (socket) => {
       if (callback && typeof callback === 'function') {
         console.log('Calling callback with message:', messageWithUser);
         callback(messageWithUser);
-      } else {
-        console.error('Callback is not a function or is undefined');
       }
     } else {
       console.error('User not found for socket ID:', socket.id);
       if (callback && typeof callback === 'function') {
-        callback(null);
+        callback({ error: 'User not found' });
       }
     }
   });

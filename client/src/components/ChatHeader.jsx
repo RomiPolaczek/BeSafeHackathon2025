@@ -1,7 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import { theme } from '../styles/theme';
+import { theme } from '../assets/styles/theme';
 import Tooltip from './Tooltip';
+import ChatIcon from '../assets/icons/ChatIcon';
 
 const Header = styled.header`
   background-color: ${theme.colors.primary};
@@ -25,6 +26,7 @@ const ConnectionStatus = styled.span`
 
 const ChatHeader = ({ chatName, isConnected }) => (
   <Header>
+    <ChatIcon width="24" height="24" />
     <h1>{chatName}</h1>
     <Tooltip text={isConnected ? 'Connected to server' : 'Attempting to reconnect...'}>
       <ConnectionStatus 

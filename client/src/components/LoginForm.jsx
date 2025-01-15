@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { theme } from '../styles/theme';
+import { theme } from '../assets/styles/theme';
 
 const LoginContainer = styled.main`
   display: flex;
@@ -95,6 +95,13 @@ const LoginForm = ({ onSubmit }) => {
     }
   };
 
+  const testLoginForm = () => {
+    const testUsername = 'testUser';
+    setUsername(testUsername);
+    handleSubmit({ preventDefault: () => {} });
+    console.log(`Test login attempted with username: ${testUsername}`);
+  };
+
   return (
     <LoginContainer>
       <Form onSubmit={handleSubmit}>
@@ -113,6 +120,9 @@ const LoginForm = ({ onSubmit }) => {
         {error && <ErrorMessage id="username-error" role="alert">{error}</ErrorMessage>}
         <Button type="submit" disabled={isSubmitting || username.length < 3}>
           {isSubmitting ? 'Joining...' : 'Join Chat'}
+        </Button>
+        <Button type="button" onClick={testLoginForm}>
+          Test Login
         </Button>
       </Form>
     </LoginContainer>
