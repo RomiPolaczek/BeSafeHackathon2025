@@ -9,11 +9,12 @@
     "dev": "concurrently \"npm run server\" \"npm run client\""
   },
   "dependencies": {
-    "concurrently": "^6.2.0"
+    "concurrently": "^6.2.0",
+    "notistack": "^3.0.1",
+    "socket.io-client": "^4.8.1",
+    "styled-components": "^6.1.14"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
   }
 }
-
-
