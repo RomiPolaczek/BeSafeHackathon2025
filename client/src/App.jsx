@@ -1,4 +1,3 @@
-// App.js
 import React from 'react';
 import { SnackbarProvider } from 'notistack';
 import Chat from './components/Chat';
@@ -14,3 +13,4 @@ function App() {
 }
 
 export default App;
+
