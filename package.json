@@ -1,0 +1,20 @@
+{
+  "name": "safe-chat",
+  "version": "1.0.0",
+  "description": "Safe Chat application with React frontend and Express backend",
+  "scripts": {
+    "start": "node server/server.js",
+    "server": "nodemon server/server.js",
+    "client": "cd client && npm start",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "dependencies": {
+    "concurrently": "^6.2.0",
+    "notistack": "^3.0.1",
+    "socket.io-client": "^4.8.1",
+    "styled-components": "^6.1.14"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
