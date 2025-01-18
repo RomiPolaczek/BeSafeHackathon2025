@@ -1,90 +1,97 @@
 import { useState, useEffect } from 'react';
+import { messaging } from '../firebaseInit';
+import { getToken, onMessage } from "firebase/messaging";
 
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding)
-    .replace(/-/g, '+')
-    .replace(/_/g, '/');
-
-  const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-
-  for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
-  }
-  return outputArray;
-}
+const VAPID_KEY = 'BD2CEK6KUtnMxUtHGGi9S4tzOWY_c-s74AdmEUdkZyXF986JtsUXpTuZTLe7rTAVPnsh3jYvBe9zYNIbRi1Wwn8'; // Replace with your actual VAPID key
 
 export function usePushNotifications(username) {
   const [isSubscribed, setIsSubscribed] = useState(false);
-  const [subscription, setSubscription] = useState(null);
+  const [token, setToken] = useState(null);
 
   useEffect(() => {
-    if ('serviceWorker' in navigator && 'PushManager' in window) {
-      navigator.serviceWorker.ready.then(async (registration) => {
-        const existingSubscription = await registration.pushManager.getSubscription();
-        if (existingSubscription) {
-          console.log(`Existing push subscription found for user: ${username}`);
-          setIsSubscribed(true);
-          setSubscription(existingSubscription);
-        } else {
-          console.log(`No existing push subscription found for user: ${username}`);
+    const initializeMessaging = async () => {
+      try {
+        if ('Notification' in window) {
+          const permission = await Notification.requestPermission();
+          if (permission === 'granted') {
+            const currentToken = await getToken(messaging, { vapidKey: VAPID_KEY });
+            if (currentToken) {
+              setToken(currentToken);
+              setIsSubscribed(true);
+              console.log(`Push notification token obtained for user: ${username}`);
+              // Send the token to your server
+              await sendTokenToServer(currentToken, username);
+            } else {
+              console.log('No registration token available. Request permission to generate one.');
+            }
+          } else {
+            console.log('Notification permission denied');
+          }
         }
-      });
-    }
+      } catch (error) {
+        console.error('An error occurred while initializing messaging', error);
+      }
+    };
+
+    initializeMessaging();
+
+    const unsubscribe = onMessage(messaging, (payload) => {
+      console.log('Message received. ', payload);
+      // Handle foreground messages here
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, [username]);
 
-  const subscribeUser = async () => {
-    if ('serviceWorker' in navigator && 'PushManager' in window) {
-      try {
-        const registration = await navigator.serviceWorker.ready;
-        const subscribeOptions = {
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(
-            'YOUR_PUBLIC_VAPID_KEY_HERE'
-          )
-        };
+  const sendTokenToServer = async (token, username) => {
+    try {
+      // Replace this URL with your actual server endpoint
+      const response = await fetch('http://localhost:4000/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token, username }),
+      });
 
-        const pushSubscription = await registration.pushManager.subscribe(subscribeOptions);
-        setIsSubscribed(true);
-        setSubscription(pushSubscription);
-
-        console.log(`Attempting to subscribe user: ${username} to push notifications`);
-
-        // Send the subscription to your server
-        await fetch(`/subscribe?username=${encodeURIComponent(username)}`, {
-          method: 'POST',
-          body: JSON.stringify(pushSubscription),
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-
-        console.log(`User: ${username} successfully subscribed to push notifications`);
-        console.log('User is subscribed:', pushSubscription);
-      } catch (error) {
-        console.error('Failed to subscribe the user: ', error);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      const data = await response.json();
+      console.log('Token sent to server successfully', data);
+    } catch (error) {
+      console.error('Error sending token to server:', error);
+      throw new Error('Failed to send token to server');
     }
   };
 
   const unsubscribeUser = async () => {
-    if (!subscription) return;
+    if (!token) return;
 
     try {
-      await subscription.unsubscribe();
+      await messaging.deleteToken(token);
       setIsSubscribed(false);
-      setSubscription(null);
+      setToken(null);
 
       console.log(`Attempting to unsubscribe user: ${username} from push notifications`);
 
-      // Inform your server about the unsubscription
-      await fetch(`/unsubscribe?username=${encodeURIComponent(username)}`, {
-        method: 'POST'
+      // Replace this URL with your actual server endpoint
+      const response = await fetch('http://localhost:4000/unsubscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token, username }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       console.log(`User: ${username} successfully unsubscribed from push notifications`);
-      console.log('User is unsubscribed');
     } catch (error) {
       console.error('Error unsubscribing', error);
     }
@@ -92,7 +99,6 @@ export function usePushNotifications(username) {
 
   return {
     isSubscribed,
-    subscribeUser,
     unsubscribeUser
   };
 }

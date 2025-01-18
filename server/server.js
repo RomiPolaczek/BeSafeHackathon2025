@@ -4,6 +4,7 @@ import { Server } from 'socket.io';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import webpush from 'web-push';
+import cors from 'cors';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,10 +14,13 @@ const server = createServer(app);
 const io = new Server(server, {
   cors: {
     origin: "http://localhost:3000",
-    methods: ["GET", "POST"]
-  }
+    methods: ["GET", "POST"],
+    credentials: true
+  },
+  transports: ['websocket', 'polling'],
 });
 
+app.use(cors());
 app.use(express.static(path.join(__dirname, '../client/build')));
 app.use(express.json());
 
@@ -42,6 +46,10 @@ app.post('/subscribe', (req, res) => {
 
 io.on('connection', (socket) => {
   console.log('New connection. Socket ID:', socket.id);
+
+  socket.on('error', (error) => {
+    console.error('Socket error:', error);
+  });
 
   socket.on('join chat', ({ username, chatId }) => {
     console.log(`User ${username} joining chat ${chatId}`);
@@ -121,6 +129,17 @@ io.on('connection', (socket) => {
     }
   });
 });
+
+// Clean up inactive users and their messages periodically
+setInterval(() => {
+  const now = Date.now();
+  users.forEach((user, socketId) => {
+    if (now - user.lastSeen > 24 * 60 * 60 * 1000) { // 24 hours
+      users.delete(socketId);
+      console.log(`Removed inactive user: ${user.username}`);
+    }
+  });
+}, 60 * 60 * 1000); // Run every hour
 
 const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => {

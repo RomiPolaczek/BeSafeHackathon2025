@@ -9,14 +9,30 @@ import SearchBar from './SearchBar';
 import { useSocket } from '../hooks/useSocket';
 import useLocalStorage from '../hooks/useLocalStorage';
 import { theme } from '../assets/styles/theme';
+import { firestore } from '../firebaseInit';
 
 const ChatContainer = styled.main`
   display: flex;
   flex-direction: column;
   height: 100vh;
-  flex: 1;
-  background-color: ${theme.colors.white};
+  background-color: ${theme.colors.background};
   box-shadow: ${theme.shadows.medium};
+  border-radius: ${theme.borderRadius.large};
+  overflow: hidden;
+`;
+
+const ChatContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+`;
+
+const SearchAndMessages = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
 `;
 
 const ReconnectingMessage = styled.div`
@@ -27,7 +43,7 @@ const ReconnectingMessage = styled.div`
 `;
 
 function Chat({ activeChat, user, setUnreadCount, updateTabNotification }) {
-  const [messages, setMessages] = useLocalStorage(`chat_${activeChat.id}`, {});
+  const [messages, setMessages] = useLocalStorage(`chat_${activeChat.id}`, []);
   const [searchResults, setSearchResults] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
 
@@ -38,10 +54,7 @@ function Chat({ activeChat, user, setUnreadCount, updateTabNotification }) {
       return;
     }
     setMessages((prevMessages) => {
-      const currentMessages = prevMessages[msg.chatId] || [];
-      
-      // Check if message already exists
-      const messageExists = currentMessages.some(
+      const messageExists = prevMessages.some(
         existingMsg => 
           existingMsg.message === msg.message &&
           existingMsg.timestamp === msg.timestamp &&
@@ -54,10 +67,7 @@ function Chat({ activeChat, user, setUnreadCount, updateTabNotification }) {
       }
 
       console.log('Updating messages state:', msg);
-      return {
-        ...prevMessages,
-        [msg.chatId]: [...currentMessages, msg]
-      };
+      return [...prevMessages, msg];
     });
 
     const isFromOtherUser = msg.username !== user.username;
@@ -69,17 +79,14 @@ function Chat({ activeChat, user, setUnreadCount, updateTabNotification }) {
 
   const onReceiveMessageHistory = useCallback((history) => {
     console.log('Received message history:', history);
-    setMessages((prevMessages) => ({
-      ...prevMessages,
-      [activeChat.id]: history
-    }));
+    setMessages(history);
     if (history.length > 0) {
       enqueueSnackbar(`Loaded ${history.length} previous messages`, { 
         variant: 'info',
         autoHideDuration: 3000,
       });
     }
-  }, [activeChat.id, enqueueSnackbar, setMessages]);
+  }, [enqueueSnackbar, setMessages]);
 
   const { 
     isConnected, 
@@ -93,12 +100,10 @@ function Chat({ activeChat, user, setUnreadCount, updateTabNotification }) {
 
   const handleReact = useCallback((messageId, emoji) => {
     setMessages((prevMessages) => {
-      const updatedMessages = { ...prevMessages };
-      const chatMessages = updatedMessages[activeChat.id] || [];
-      const messageIndex = chatMessages.findIndex(msg => msg.id === messageId);
+      const messageIndex = prevMessages.findIndex(msg => msg.id === messageId);
       
       if (messageIndex !== -1) {
-        const message = chatMessages[messageIndex];
+        const message = prevMessages[messageIndex];
         const reactions = message.reactions || {};
         const users = reactions[emoji] || [];
         
@@ -114,23 +119,28 @@ function Chat({ activeChat, user, setUnreadCount, updateTabNotification }) {
           reactions[emoji] = users;
         }
         
-        chatMessages[messageIndex] = { ...message, reactions };
+        const updatedMessage = { ...message, reactions };
+        return [
+          ...prevMessages.slice(0, messageIndex),
+          updatedMessage,
+          ...prevMessages.slice(messageIndex + 1)
+        ];
       }
       
-      return updatedMessages;
+      return prevMessages;
     });
     
     // Emit reaction to server
     socket.emit('react', { messageId, emoji, username: user.username, chatId: activeChat.id });
-  }, [activeChat.id, user.username, socket, setMessages]);
+  }, [user.username, socket, setMessages, activeChat.id]);
 
   const handleSearch = useCallback((query) => {
-    const results = (messages[activeChat.id] || []).filter(msg => 
+    const results = messages.filter(msg => 
       msg.message.toLowerCase().includes(query.toLowerCase()) ||
       msg.username.toLowerCase().includes(query.toLowerCase())
     );
     setSearchResults(results);
-  }, [activeChat.id, messages]);
+  }, [messages]);
 
   const handleSendMessage = useCallback((message) => {
     sendMessage(message);
@@ -142,32 +152,36 @@ function Chat({ activeChat, user, setUnreadCount, updateTabNotification }) {
 
   const memoizedMessageList = useMemo(() => (
     <MessageList 
-      messages={searchResults.length > 0 ? searchResults : messages[activeChat.id] || []} 
+      messages={searchResults.length > 0 ? searchResults : messages} 
       onReact={handleReact}
       user={user}
       setUnreadCount={setUnreadCount}
       updateTabNotification={updateTabNotification}
       markMessageAsRead={markMessageAsRead}
     />
-  ), [searchResults, messages, activeChat.id, handleReact, user, setUnreadCount, updateTabNotification, markMessageAsRead]);
+  ), [searchResults, messages, handleReact, user, setUnreadCount, updateTabNotification, markMessageAsRead]);
 
   return (
     <ChatContainer aria-label={`Chat room: ${activeChat.name}`}>
       <ChatHeader chatName={activeChat.name} isConnected={isConnected} />
-      <SearchBar onSearch={handleSearch} />
-      {!isConnected && reconnectAttempt > 0 && (
-        <ReconnectingMessage role="alert" aria-live="assertive">
-          Reconnecting... Attempt {reconnectAttempt}
-        </ReconnectingMessage>
-      )}
-      {memoizedMessageList}
-      <TypingIndicator typingUsers={typingUsers} />
-      <MessageInput 
-        onSendMessage={handleSendMessage} 
-        onTyping={emitTyping} 
-        isConnected={isConnected}
-        onShowAllMessages={handleShowAllMessages}
-      />
+      <ChatContent>
+        <SearchAndMessages>
+          <SearchBar onSearch={handleSearch} />
+          {!isConnected && reconnectAttempt > 0 && (
+            <ReconnectingMessage role="alert" aria-live="assertive">
+              Reconnecting... Attempt {reconnectAttempt}
+            </ReconnectingMessage>
+          )}
+          {memoizedMessageList}
+        </SearchAndMessages>
+        <TypingIndicator typingUsers={typingUsers} />
+        <MessageInput 
+          onSendMessage={handleSendMessage} 
+          onTyping={emitTyping} 
+          isConnected={isConnected}
+          onShowAllMessages={handleShowAllMessages}
+        />
+      </ChatContent>
     </ChatContainer>
   );
 }

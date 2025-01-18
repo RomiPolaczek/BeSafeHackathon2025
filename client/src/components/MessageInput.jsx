@@ -1,111 +1,97 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef } from 'react';
 import styled from 'styled-components';
+import { Send, Paperclip } from 'lucide-react';
 import { theme } from '../assets/styles/theme';
 
 const InputContainer = styled.form`
   display: flex;
-  padding: ${theme.spacing.medium};
-  border-top: 1px solid ${theme.colors.border};
+  align-items: center;
+  background-color: ${theme.colors.white};
+  border-radius: ${theme.borderRadius.medium};
+  padding: ${theme.spacing.sm};
 `;
 
-const Input = styled.input`
+const TextInput = styled.input`
   flex: 1;
-  padding: ${theme.spacing.small};
-  border: 1px solid ${theme.colors.border};
-  border-radius: ${theme.borderRadius.small};
+  border: none;
   font-size: ${theme.fontSizes.medium};
-  opacity: ${props => props.disabled ? 0.5 : 1};
+  padding: ${theme.spacing.sm};
+  &:focus {
+    outline: none;
+  }
 `;
 
-const SendButton = styled.button`
-  background-color: ${theme.colors.primary};
-  color: ${theme.colors.white};
+const Button = styled.button`
+  background: none;
   border: none;
-  padding: ${theme.spacing.small} ${theme.spacing.medium};
-  margin-left: ${theme.spacing.small};
-  border-radius: ${theme.borderRadius.small};
   cursor: pointer;
-  font-size: ${theme.fontSizes.medium};
-  transition: background-color 0.3s ease;
+  color: ${theme.colors.primary};
+  font-size: ${theme.fontSizes.large};
+  padding: ${theme.spacing.sm};
+  transition: color ${theme.transitions.default};
 
   &:hover {
-    background-color: ${theme.colors.primary}dd;
+    color: ${theme.colors.secondary};
   }
 
   &:disabled {
-    background-color: ${theme.colors.lightText};
+    color: ${theme.colors.lightText};
     cursor: not-allowed;
   }
-
-  &:focus {
-    outline: 2px solid ${theme.colors.primary};
-    outline-offset: 2px;
-  }
 `;
 
-const ButtonContainer = styled.div`
-  display: flex;
-  gap: ${theme.spacing.small};
+const FileInput = styled.input`
+  display: none;
 `;
 
-const MessageInput = ({ onSendMessage, onTyping, isConnected, onShowAllMessages }) => {
-  const [inputMessage, setInputMessage] = useState('');
-  const typingTimeoutRef = useRef(null);
+function MessageInput({ onSendMessage, onTyping, isConnected }) {
+  const [message, setMessage] = useState('');
+  const [file, setFile] = useState(null);
+  const fileInputRef = useRef();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (inputMessage.trim() && isConnected) {
-      onSendMessage(inputMessage);
-      setInputMessage('');
-      onTyping(false);
+    if (message.trim() || file) {
+      onSendMessage(message, file);
+      setMessage('');
+      setFile(null);
     }
   };
 
-  const handleTyping = useCallback(() => {
-    if (isConnected) {
-      onTyping(true);
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-      }
-      typingTimeoutRef.current = setTimeout(() => {
-        onTyping(false);
-      }, 3000);
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
     }
-  }, [onTyping, isConnected]);
+  };
 
   return (
     <InputContainer onSubmit={handleSubmit}>
-      <Input
-        type="text"
-        value={inputMessage}
-        onChange={(e) => {
-          setInputMessage(e.target.value);
-          handleTyping();
-        }}
-        placeholder={isConnected ? "Type a message..." : "Connecting..."}
-        disabled={!isConnected}
-        aria-label="Type a message"
+      <Button type="button" onClick={() => fileInputRef.current.click()}>
+        <Paperclip />
+      </Button>
+      <FileInput
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
       />
-      <ButtonContainer>
-        <SendButton 
-          type="submit" 
-          disabled={!inputMessage.trim() || !isConnected}
-          aria-label="Send message"
-        >
-          Send
-        </SendButton>
-        <SendButton 
-          type="button" 
-          onClick={onShowAllMessages}
-          disabled={!isConnected}
-          aria-label="Show all messages"
-        >
-          Show All
-        </SendButton>
-      </ButtonContainer>
+      <TextInput
+        type="text"
+        value={message}
+        onChange={(e) => {
+          setMessage(e.target.value);
+          onTyping();
+        }}
+        placeholder="Type a message..."
+        disabled={!isConnected}
+      />
+      <Button type="submit" disabled={!isConnected || (!message.trim() && !file)}>
+        <Send />
+      </Button>
     </InputContainer>
   );
-};
+}
 
 export default MessageInput;
 

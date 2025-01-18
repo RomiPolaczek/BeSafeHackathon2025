@@ -8,12 +8,19 @@ const Header = styled.header`
   background-color: ${theme.colors.primary};
   color: ${theme.colors.white};
   padding: ${theme.spacing.medium};
-  text-align: center;
-  font-size: ${theme.fontSizes.large};
-  font-weight: 600;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: ${theme.shadows.small};
+`;
+
+const ChatTitle = styled.h1`
+  font-size: ${theme.fontSizes.large};
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: ${theme.spacing.small};
 `;
 
 const ConnectionStatus = styled.span`
@@ -26,8 +33,10 @@ const ConnectionStatus = styled.span`
 
 const ChatHeader = ({ chatName, isConnected }) => (
   <Header>
-    <ChatIcon width="24" height="24" />
-    <h1>{chatName}</h1>
+    <ChatTitle>
+      <ChatIcon width="24" height="24" />
+      {chatName}
+    </ChatTitle>
     <Tooltip text={isConnected ? 'Connected to server' : 'Attempting to reconnect...'}>
       <ConnectionStatus 
         $isConnected={isConnected}

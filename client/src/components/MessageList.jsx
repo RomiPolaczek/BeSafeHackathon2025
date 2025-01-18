@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { theme } from '../assets/styles/theme';
 import { Check, CheckCheck, AlertTriangle, Info, Smile } from 'lucide-react';
@@ -62,22 +62,6 @@ const ReadStatus = styled.span`
   margin-top: ${theme.spacing.small};
   font-size: ${theme.fontSizes.small};
   color: ${props => props.$isSent ? theme.colors.white : theme.colors.lightText};
-`;
-
-const PriorityIndicator = styled.span`
-  font-size: ${theme.fontSizes.small};
-  font-weight: bold;
-  margin-right: ${theme.spacing.small};
-  color: ${props => {
-    switch (props.$priority) {
-      case 'high':
-        return theme.colors.error;
-      case 'low':
-        return theme.colors.success;
-      default:
-        return 'inherit';
-    }
-  }};
 `;
 
 const PriorityIcon = styled.span`
@@ -196,7 +180,7 @@ const MessageList = ({ messages, user, onReact, setUnreadCount, updateTabNotific
           )}
         </MessageContent>
         <ReactionContainer>
-          {Object.entries(msg.reactions || {}).map(([emoji, users]) => (
+          {msg.reactions && Object.entries(msg.reactions).map(([emoji, users]) => (
             <Reaction key={emoji} onClick={() => onReact(msg.id, emoji)}>
               {emoji} {users.length}
             </Reaction>

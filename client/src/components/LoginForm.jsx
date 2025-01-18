@@ -64,7 +64,7 @@ const ErrorMessage = styled.p`
   font-size: ${theme.fontSizes.small};
 `;
 
-const LoginForm = ({ onSubmit }) => {
+const LoginForm = ({ onSubmit, existingUsers }) => {
   const [username, setUsername] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -85,6 +85,9 @@ const LoginForm = ({ onSubmit }) => {
     } else if (trimmedUsername.length > 20) {
       setError('Username must be no more than 20 characters long');
       setIsSubmitting(false);
+    } else if (existingUsers.some(user => user.username.toLowerCase() === trimmedUsername.toLowerCase())) {
+      setError('Username already exists');
+      setIsSubmitting(false);
     } else {
       setError('');
       // Simulate a delay to show loading state
@@ -93,13 +96,6 @@ const LoginForm = ({ onSubmit }) => {
         onSubmit(trimmedUsername);
       }, 1000);
     }
-  };
-
-  const testLoginForm = () => {
-    const testUsername = 'testUser';
-    setUsername(testUsername);
-    handleSubmit({ preventDefault: () => {} });
-    console.log(`Test login attempted with username: ${testUsername}`);
   };
 
   return (
@@ -120,9 +116,6 @@ const LoginForm = ({ onSubmit }) => {
         {error && <ErrorMessage id="username-error" role="alert">{error}</ErrorMessage>}
         <Button type="submit" disabled={isSubmitting || username.length < 3}>
           {isSubmitting ? 'Joining...' : 'Join Chat'}
-        </Button>
-        <Button type="button" onClick={testLoginForm}>
-          Test Login
         </Button>
       </Form>
     </LoginContainer>
