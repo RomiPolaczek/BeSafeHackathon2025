@@ -55,27 +55,6 @@ const MessageInput = ({ onSendMessage, onTyping, isConnected, onShowAllMessages 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (inputMessage.trim() && isConnected) {
-      // try {
-      //   console.log('rrr:', error);
-
-      //   // Send the message to the server
-      //   const response = await socket.emit('chat message', { text: inputMessage, chatId: ''});
-      //   console.log('wwwrrwwrrrrrrrrrrr', error);
-  
-
-      //   if (response && response.error) {
-      //     alert(response.error); // Show alert if message was blocked
-      //     return;
-      //   }
-  
-      //   // Reset message input if message is valid
-      //   onSendMessage(inputMessage);
-      //   setInputMessage('');
-      //   onTyping(false);
-      // } catch (error) {
-      //   console.error('Error sending message:', error);
-      // }
-
       try {
         onSendMessage(inputMessage);
         setInputMessage('');
@@ -85,39 +64,6 @@ const MessageInput = ({ onSendMessage, onTyping, isConnected, onShowAllMessages 
         }
     }
   };
-
-  // const handleSubmit = async (e) => {
-  //   // e.preventDefault();
-  //   if (inputMessage.trim() && isConnected) {
-  //     try {
-  //       //  e.preventDefault();
-  //       const response = await fetch('/api/validate-message', {
-  //         method: 'POST',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //         },
-  //         body: JSON.stringify({ message: inputMessage }),
-  //       });
-  
-  //       if (!response.ok) {
-  //         const result = await response.json();
-  //         alert(result.message); // Notify the user if the message is harmful
-  //         return;
-  //       }
-  
-  //       onSendMessage(inputMessage); // Send the message if it's safe
-  //       setInputMessage('');
-  //       onTyping(false);
-      // } catch (error) {
-      //   console.error('Error checking message:', error);
-      // }
-  //   }
-  //   else{
-  //     console.error('Error checking message:', e, 'inputMessage.trim() && isConnected');
-  //   }
-  //   console.error('Error checking message:', e, 'inputMessage.trim(222) && isConnected');
-
-  // };
 
   const handleTyping = useCallback(() => {
     if (isConnected) {

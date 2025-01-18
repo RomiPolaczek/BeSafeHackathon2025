@@ -56,84 +56,6 @@ io.on('connection', (socket) => {
     socket.emit('message history', chatMessages);
   });
 
-  // socket.on('chat message', (msg, callback) => {
-  //   console.log('Received chat message:', msg);
-  //   const user = users.get(socket.id);
-  //   if (user) {
-  //     const messageWithUser = { 
-  //       id: Date.now().toString(),
-  //       ...msg, 
-  //       username: user.username, 
-  //       timestamp: new Date(),
-  //       priority: msg.priority || 'normal',
-  //       read: false
-  //     };
-
-  //     if (!messageHistory.has(msg.chatId)) {
-  //       messageHistory.set(msg.chatId, []);
-  //     }
-  //     messageHistory.get(msg.chatId).push(messageWithUser);
-  //     console.log(`Saved message to chat ${msg.chatId}. Total messages: ${messageHistory.get(msg.chatId).length}`);
-      
-  //     console.log('Broadcasting message to room:', msg.chatId, messageWithUser);
-  //     io.to(msg.chatId).emit('chat message', messageWithUser);
-      
-  //     if (callback && typeof callback === 'function') {
-  //       console.log('Calling callback with message:', messageWithUser);
-  //       callback(messageWithUser);
-  //     }
-  //   } else {
-  //     console.error('User not found for socket ID:', socket.id);
-  //     if (callback && typeof callback === 'function') {
-  //       callback({ error: 'User not found' });
-  //     }
-  //   }
-  // });
-
-  // socket.on('chat message', async (msg, callback) => {
-  //   console.log('Received chat message:', msg);
-  //   const user = users.get(socket.id);
-
-  //   if (user) {
-  //     // Check message content
-  //     const isSafe = await checkMessageContent(msg); // Assuming msg.text contains the message text
-
-  //     if (isSafe) {
-  //       console.log('The message:', msg, 'is safe (:');
-
-  //       const messageWithUser = {
-  //         id: Date.now().toString(),
-  //         ...msg,
-  //         username: user.username,
-  //         timestamp: new Date(),
-  //         priority: msg.priority || 'normal',
-  //         read: false,
-  //       };
-
-  //       if (!messageHistory.has(msg.chatId)) {
-  //         messageHistory.set(msg.chatId, []);
-  //       }
-  //       messageHistory.get(msg.chatId).push(messageWithUser);
-
-  //       io.to(msg.chatId).emit('chat message', messageWithUser);
-
-  //       if (callback && typeof callback === 'function') {
-  //         callback(messageWithUser);
-  //       }
-  //     } else {
-  //       console.warn('Message flagged as harmful');
-  //       if (callback && typeof callback === 'function') {
-  //         callback({ error: 'Message is harmful and was not sent.' });
-  //       }
-  //     }
-  //   } else {
-  //     console.error('User not found for socket ID:', socket.id);
-  //     if (callback && typeof callback === 'function') {
-  //       callback({ error: 'User not found' });
-  //     }
-  //   }
-  // });
-
   socket.on('chat message', async (msg, callback) => {
     console.log('Received chat message:', msg);
     const user = users.get(socket.id);
@@ -169,7 +91,7 @@ io.on('connection', (socket) => {
         console.warn('Message flagged as harmful');
         // Callback for failed message due to harmful content
         if (callback && typeof callback === 'function') {
-          callback({ error: 'Message is harmful and was not sent.' });
+          callback({ alert: 'Message is harmful and was not sent.' });
         }
       }
     } else {
