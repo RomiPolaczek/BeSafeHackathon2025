@@ -17,6 +17,7 @@ export const handleChatMessage = (io, socket, msg) => {
   }
 };
 
+
 export const handleTyping = (socket) => {
   const user = users.get(socket.id);
   if (user) {
