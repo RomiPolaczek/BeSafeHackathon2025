@@ -16,13 +16,23 @@ const AppContainer = styled.div`
 `;
 
 const Header = styled.header`
-  background-color: #2613a4;
-  padding: 10px 20px;
+  //background-color: #2613a4;
+  //padding: 10px 20px;
+  background-color: #53474F;
+  padding: 5px 30px 5px 30px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  
 `;
 
 const Nav = styled.nav`
+  //display: flex;
+  //justify-content: space-between;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
+  align-items: center;
 `;
 
 const NavLink = styled(Link)`
@@ -37,6 +47,7 @@ const NavLink = styled(Link)`
 
 const Main = styled.main`
   padding: 20px;
+  
 `;
 
 const Footer = styled.footer`
@@ -75,7 +86,7 @@ function App() {
               </Routes>
             </Main>
             <Footer>
-              <p>&copy; 2023 SafeChat</p>
+              <p>&copy; 2025 SafeChat</p>
             </Footer>
           </AppContainer>
         </Router>
