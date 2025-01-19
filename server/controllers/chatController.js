@@ -11,7 +11,6 @@ export const handleChatMessage = (io, socket, msg) => {
   const user = users.get(socket.id);
   if (user) {
     const messageWithUser = { ...msg, username: user.username, timestamp: new Date() };
-    messageHistory.push(messageWithUser);
     io.emit('chat message', messageWithUser);
     updateLastSeen(io, socket.id);
   }

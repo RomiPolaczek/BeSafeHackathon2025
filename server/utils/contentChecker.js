@@ -11,7 +11,7 @@ export async function checkMessageContent(message) {
     // Define the message to be passed to the OpenAI API
     const promptMessage = `Please analyze the following message for any offensive language, explicit sexual content, harmful language, or inappropriate material. If any such content is found, flag the message as "inappropriate". If the message is clean and suitable for children, respond with "safe."
     
-    Message: "${message.message}"`;
+    Message: "${message}"`;
 
     // Call the OpenAI API using the correct method
     const response = await openai.chat.completions.create({
@@ -35,10 +35,10 @@ export async function checkMessageContent(message) {
       return 0;
     } else {
       console.error('Unexpected response:', responseContent);
-      return false;
+      return 0;
     }
   } catch (error) {
     console.error('Error checking message content:', error);
-    return false; // Consider messages harmful if there's an error
+    return 0; // Consider messages harmful if there's an error
   }
 }
