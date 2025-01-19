@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import io from 'socket.io-client';
+import { functions } from '../firebaseInit';
 
 const INITIAL_RECONNECT_DELAY = 1000;
 const MAX_RECONNECT_DELAY = 30000;
@@ -169,7 +170,8 @@ export function useSocket(username, activeChat, onReceiveMessage, onReceiveMessa
     sendMessage,
     emitTyping,
     reconnectAttempt,
-    markMessageAsRead
+    markMessageAsRead,
+    socket
   };
 }
 
