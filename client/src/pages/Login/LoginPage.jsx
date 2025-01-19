@@ -1,81 +1,67 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import styles from './Login.module.css';
+import { useAuth } from '../../contexts/AuthContext';
+import styles from './LoginPage.module.css';
 
-const Login = () => {
+const LoginPage = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  const { login } = useAuth();
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setError('');
-
+    setIsLoading(true);
     try {
-      const auth = getAuth();
-      await signInWithEmailAndPassword(auth, email, password);
+      await login(username, password);
       navigate('/main');
     } catch (err) {
       setError(err.message);
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <main className={styles.loginContainer}>
+    <div className={styles.loginContainer}>
       <h1 className={styles.title}>Login to SafeChat</h1>
       <form className={styles.form} onSubmit={handleSubmit}>
         <div className={styles.inputGroup}>
-          <label htmlFor="email" className={styles.label}>Email</label>
+          <label htmlFor="username" className={styles.label}>Username</label>
           <input
-            id="email"
-            type="email"
+            id="username"
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             className={styles.input}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             required
-            aria-invalid={error ? "true" : "false"}
           />
         </div>
         <div className={styles.inputGroup}>
           <label htmlFor="password" className={styles.label}>Password</label>
-          <div className={styles.passwordContainer}>
-            <input
-              id="password"
-              type={showPassword ? 'text' : 'password'}
-              className={styles.input}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              aria-invalid={error ? "true" : "false"}
-            />
-            <button
-              type="button"
-              className={styles.eyeButton}
-              onClick={() => setShowPassword(!showPassword)}
-              aria-label={showPassword ? "Hide password" : "Show password"}
-            >
-              <i className={`fas ${showPassword ? 'fa-eye' : 'fa-eye-slash'}`}></i>
-            </button>
-          </div>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className={styles.input}
+            required
+          />
         </div>
-        {error && <p className={styles.errorMessage} role="alert">{error}</p>}
-        <button type="submit" className={styles.button} disabled={isSubmitting}>
-          {isSubmitting ? 'Logging in...' : 'Login'}
+        {error && <p className={styles.error}>{error}</p>}
+        <button type="submit" className={styles.button} disabled={isLoading}>
+          {isLoading ? 'Logging in...' : 'Login'}
         </button>
       </form>
       <p className={styles.text}>
         Don't have an account? <a href="/signup" className={styles.link}>Sign Up</a>
       </p>
-    </main>
+    </div>
   );
 };
 
-export default Login;
+export default LoginPage;
 

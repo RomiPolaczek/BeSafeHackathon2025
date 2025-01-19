@@ -1,58 +1,59 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getAuth, signOut } from 'firebase/auth';
-import { getFirestore, collection, query, onSnapshot } from 'firebase/firestore';
-import styles from './MainPage.module.css';
+import { useAuth } from '../../contexts/AuthContext';
+import styled from 'styled-components';
+
+const MainContainer = styled.div`
+  padding: 20px;
+`;
+
+const Header = styled.header`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+`;
+
+const Title = styled.h1`
+  color: #2613a4;
+`;
+
+const LogoutButton = styled.button`
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+`;
+
+const NavLink = styled(Link)`
+  display: block;
+  margin-bottom: 10px;
+  color: #2613a4;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
 
 const MainPage = () => {
-  const [chats, setChats] = useState([]);
   const navigate = useNavigate();
-  const auth = getAuth();
+  const { logout } = useAuth();
 
-  useEffect(() => {
-    const db = getFirestore();
-    const chatsRef = collection(db, 'chats');
-    const q = query(chatsRef);
-
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const chatsList = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setChats(chatsList);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      navigate('/');
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
+  const handleLogout = () => {
+    logout();
+    navigate('/');
   };
 
   return (
-    <div className={styles.mainPageContainer}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>Welcome, {auth.currentUser?.displayName || 'User'}!</h1>
-        <button onClick={handleLogout} className={styles.logoutButton}>Logout</button>
-      </header>
-      <main>
-        <h2 className={styles.chatListTitle}>Available Chats:</h2>
-        <div className={styles.chatList}>
-          {chats.map((chat) => (
-            <div key={chat.id} className={styles.chatItem}>
-              <Link to={`/chat/${chat.id}`} className={styles.navLink}>
-                {chat.name}
-              </Link>
-            </div>
-          ))}
-        </div>
-      </main>
-    </div>
+    <MainContainer>
+      <Header>
+        <Title>Welcome to SafeChat!</Title>
+        <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
+      </Header>
+      <NavLink to="/chat">Go to Chat</NavLink>
+    </MainContainer>
   );
 };
 

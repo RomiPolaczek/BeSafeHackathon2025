@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { useAuth } from '../../contexts/AuthContext';
 import styles from './SignUp.module.css';
 
-const SignUp = () => {
+const SignUpPage = () => {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -26,10 +27,12 @@ const SignUp = () => {
     }
 
     try {
-      const auth = getAuth();
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(userCredential.user, { displayName: fullName });
-      navigate('/main');
+      const success = await register(username, password, fullName);
+      if (success) {
+        navigate('/main');
+      } else {
+        setError('Failed to create an account');
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -53,13 +56,13 @@ const SignUp = () => {
           />
         </div>
         <div className={styles.inputGroup}>
-          <label htmlFor="email" className={styles.label}>Email</label>
+          <label htmlFor="username" className={styles.label}>Username</label>
           <input
-            id="email"
-            type="email"
+            id="username"
+            type="text"
             className={styles.input}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required
           />
         </div>
@@ -117,5 +120,5 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default SignUpPage;
 

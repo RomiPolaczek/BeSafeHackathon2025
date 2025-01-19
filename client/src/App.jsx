@@ -7,37 +7,73 @@ import SignUp from './pages/SignUp/SignUpPage';
 import MainPage from './pages/MainPage/MainPage';
 import ChatPage from './pages/Chat/ChatPage';
 import PrivateRoute from './components/PrivateRoute';
-import styles from './App.module.css';
-import projectLogo from './assets/project-logo.png';
+import styled from 'styled-components';
+
+const AppContainer = styled.div`
+  font-family: Arial, sans-serif;
+`;
+
+const Header = styled.header`
+  background-color: #2613a4;
+  padding: 10px 20px;
+`;
+
+const Nav = styled.nav`
+  display: flex;
+  justify-content: space-between;
+`;
+
+const NavLink = styled(Link)`
+  color: white;
+  text-decoration: none;
+  margin-right: 15px;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const Main = styled.main`
+  padding: 20px;
+`;
+
+const Footer = styled.footer`
+  background-color: #2613a4;
+  color: white;
+  text-align: center;
+  padding: 10px 0;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+`;
 
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className={styles.app}>
-          <header className={styles.appHeader}>
-            <img src={projectLogo || "/placeholder.svg"} alt="SafeChat Logo" className={styles.appLogo} />
-            <nav className={styles.appNav}>
-              <Link to="/" className={styles.appLink}>Home</Link>
-              <Link to="/login" className={styles.appLink}>Login</Link>
-              <Link to="/signup" className={styles.appLink}>Sign Up</Link>
-            </nav>
-          </header>
-
-          <main className={styles.main}>
+        <AppContainer>
+          <Header>
+            <Nav>
+              <div>
+                <NavLink to="/">Home</NavLink>
+                <NavLink to="/login">Login</NavLink>
+                <NavLink to="/signup">Sign Up</NavLink>
+              </div>
+            </Nav>
+          </Header>
+          <Main>
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/main" element={<PrivateRoute><MainPage /></PrivateRoute>} />
-              <Route path="/chat/:chatId" element={<PrivateRoute><ChatPage /></PrivateRoute>} />
+              <Route path="/chat" element={<PrivateRoute><ChatPage /></PrivateRoute>} />
             </Routes>
-          </main>
-
-          <footer className={styles.footer}>
-            <p>&copy; 2025 SafeChat</p>
-          </footer>
-        </div>
+          </Main>
+          <Footer>
+            <p>&copy; 2023 SafeChat. All rights reserved.</p>
+          </Footer>
+        </AppContainer>
       </Router>
     </AuthProvider>
   );
