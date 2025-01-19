@@ -9,7 +9,7 @@ dotenv.config();
 // mock AI
 export async function checkMessageContent(message) {
   try {
-    if (message == 1) {
+    if (message == "1") {
       return 1
     } else {
       return 0
@@ -22,6 +22,7 @@ export async function checkMessageContent(message) {
 
 
 //using actual AI
+// TODO: comment out for actual AI
 // export async function checkMessageContent(message) {
 //   try {
 //     // Define the message to be passed to the OpenAI API

@@ -193,6 +193,11 @@ io.on('connection', (socket) => {
       messageHistory.push(message);  
       conversations.get(conversationId).messages.push(message);
       io.to(msg.recipientId.toString()).emit('chat message', message);
+    } else {
+      console.log('The message: "', msg.content, '" is not safe');
+
+      // Send feedback to the client about the unsafe message
+      socket.emit('message feedback', { success: false, message: 'Your message contains inappropriate content and was not sent.' });
     }
 
     updateLastSeen(socket.user.id);
