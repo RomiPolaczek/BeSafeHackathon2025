@@ -7,10 +7,12 @@ import SignUp from './pages/SignUp/SignUpPage';
 import MainPage from './pages/MainPage/MainPage';
 import ChatPage from './pages/Chat/ChatPage';
 import PrivateRoute from './components/PrivateRoute';
+import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 import styled from 'styled-components';
 
 const AppContainer = styled.div`
-  font-family: Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+    "Droid Sans", "Helvetica Neue", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
 `;
 
 const Header = styled.header`
@@ -50,33 +52,35 @@ const Footer = styled.footer`
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <AppContainer>
-          <Header>
-            <Nav>
-              <div>
-                <NavLink to="/">Home</NavLink>
-                <NavLink to="/login">Login</NavLink>
-                <NavLink to="/signup">Sign Up</NavLink>
-              </div>
-            </Nav>
-          </Header>
-          <Main>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/main" element={<PrivateRoute><MainPage /></PrivateRoute>} />
-              <Route path="/chat" element={<PrivateRoute><ChatPage /></PrivateRoute>} />
-            </Routes>
-          </Main>
-          <Footer>
-            <p>&copy; 2023 SafeChat</p>
-          </Footer>
-        </AppContainer>
-      </Router>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <Router>
+          <AppContainer>
+            <Header>
+              <Nav>
+                <div>
+                  <NavLink to="/">Home</NavLink>
+                  <NavLink to="/login">Login</NavLink>
+                  <NavLink to="/signup">Sign Up</NavLink>
+                </div>
+              </Nav>
+            </Header>
+            <Main>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<SignUp />} />
+                <Route path="/main" element={<PrivateRoute><MainPage /></PrivateRoute>} />
+                <Route path="/chat" element={<PrivateRoute><ChatPage /></PrivateRoute>} />
+              </Routes>
+            </Main>
+            <Footer>
+              <p>&copy; 2023 SafeChat</p>
+            </Footer>
+          </AppContainer>
+        </Router>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 

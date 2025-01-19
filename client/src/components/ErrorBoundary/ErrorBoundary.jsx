@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { theme } from '../assets/styles/theme';
+import { theme } from '../../assets/styles/theme';
 
 const ErrorContainer = styled.div`
   display: flex;

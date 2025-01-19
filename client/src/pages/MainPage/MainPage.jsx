@@ -1,41 +1,8 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import styled from 'styled-components';
-
-const MainContainer = styled.div`
-  padding: 20px;
-`;
-
-const Header = styled.header`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-`;
-
-const Title = styled.h1`
-  color: #2613a4;
-`;
-
-const LogoutButton = styled.button`
-  background-color: #f44336;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  cursor: pointer;
-`;
-
-const NavLink = styled(Link)`
-  display: block;
-  margin-bottom: 10px;
-  color: #2613a4;
-  text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
-`;
+import WelcomeMessage from '../../components/WelcomeMessage/WelcomeMessage';
+import styles from './MainPage.module.css';
 
 const MainPage = () => {
   const navigate = useNavigate();
@@ -47,13 +14,14 @@ const MainPage = () => {
   };
 
   return (
-    <MainContainer>
-      <Header>
-        <Title>Welcome to SafeChat!</Title>
-        <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
-      </Header>
-      <NavLink to="/chat">Go to Chat</NavLink>
-    </MainContainer>
+    <div className={styles.mainPageContainer}>
+      <header className={styles.header}>
+        <h1 className={styles.title}>SafeChat Dashboard</h1>
+        <button onClick={handleLogout} className={styles.logoutButton}>Logout</button>
+      </header>
+      <WelcomeMessage />
+      <Link to="/chat" className={styles.goToChatButton}>Go to Chat</Link>
+    </div>
   );
 };
 

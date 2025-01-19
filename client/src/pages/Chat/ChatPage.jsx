@@ -7,6 +7,7 @@ import UserSearch from '../../components/UserSearch';
 import TypingIndicator from '../../components/TypingIndicator/TypingIndicator';
 import MessageInput from '../../components/MessageInput/MessageInput';
 import MessageList from '../../components/MessageList/MessageList';
+import LastSeen from '../../components/LastSeen/LastSeen';
 import styles from './ChatPage.module.css';
 
 const ChatPage = () => {
@@ -16,6 +17,7 @@ const ChatPage = () => {
   const [messages, setMessages] = useState([]);
   const [socket, setSocket] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
+  const [lastSeen, setLastSeen] = useState({});
   const messageListRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
@@ -43,6 +45,13 @@ const ChatPage = () => {
       if (selectedConversation && userId === selectedConversation.id) {
         setIsTyping(false);
       }
+    });
+
+    newSocket.on('last seen update', ({ userId, username, lastSeen }) => {
+      setLastSeen(prev => ({
+        ...prev,
+        [userId]: { username, lastSeen }
+      }));
     });
 
     setSocket(newSocket);
@@ -166,6 +175,7 @@ const ChatPage = () => {
           onSelectConversation={handleSelectConversation}
           selectedConversation={selectedConversation}
         />
+        <LastSeen lastSeen={lastSeen} />
       </div>
       <div className={styles.chatArea}>
         {selectedConversation ? (
