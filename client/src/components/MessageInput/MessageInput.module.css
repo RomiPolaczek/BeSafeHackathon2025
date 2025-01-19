@@ -1,0 +1,38 @@
+.inputForm {
+    display: flex;
+    padding: 1rem;
+    background-color: white;
+    border-top: 1px solid #e0e0e0;
+  }
+  
+  .messageInput {
+    flex-grow: 1;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 0.5rem;
+  }
+  
+  .sendButton,
+  .showAllButton {
+    padding: 0.5rem 1rem;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .sendButton:disabled,
+  .showAllButton:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  .showAllButton {
+    margin-left: 0.5rem;
+    background-color: #f1f0f0;
+    color: #333;
+  }
+  
+  

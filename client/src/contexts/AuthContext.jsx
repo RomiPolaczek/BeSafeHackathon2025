@@ -1,14 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { auth } from '../firebaseInit';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 const AuthContext = createContext();
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+  return useContext(AuthContext);
 }
 
 export function AuthProvider({ children }) {
@@ -16,7 +12,8 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(user => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       setLoading(false);
     });
@@ -24,39 +21,9 @@ export function AuthProvider({ children }) {
     return unsubscribe;
   }, []);
 
-  async function signUp(email, password) {
-    try {
-      await auth.createUserWithEmailAndPassword(email, password);
-    } catch (error) {
-      console.error('Error signing up:', error);
-      throw error;
-    }
-  }
-
-  async function signIn(email, password) {
-    try {
-      await auth.signInWithEmailAndPassword(email, password);
-    } catch (error) {
-      console.error('Error signing in:', error);
-      throw error;
-    }
-  }
-
-  async function signOut() {
-    try {
-      await auth.signOut();
-    } catch (error) {
-      console.error('Error signing out:', error);
-      throw error;
-    }
-  }
-
   const value = {
     currentUser,
-    loading,
-    signUp,
-    signIn,
-    signOut
+    loading
   };
 
   return (

@@ -1,22 +1,42 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import svgr from 'vite-plugin-svgr';
-import path from 'path';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import svgr from 'vite-plugin-svgr'
+import path from 'path'
 
 export default defineConfig({
-  plugins: [react(), svgr()],
+  plugins: [
+    react(),
+    svgr()
+  ],
   server: {
     port: 3000,
-    open: true,
+    proxy: {
+      '/socket.io': {
+        target: 'http://localhost:4000',
+        ws: true,
+        changeOrigin: true
+      }
+    }
   },
   build: {
-    outDir: 'build',
     sourcemap: true,
+    outDir: 'dist',
+    emptyOutDir: true,
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-    },
+      '@': path.resolve(__dirname, 'src')
+    }
   },
-});
+  optimizeDeps: {
+    include: ['react', 'react-dom']
+  },
+  esbuild: {
+    loader: 'jsx',
+    include: /src\/.*\.jsx?$/,
+    exclude: []
+  },
+  root: '.',
+  publicDir: 'public',
+})
 

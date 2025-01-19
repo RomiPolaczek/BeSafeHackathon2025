@@ -14,11 +14,13 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.1",
     "socket.io-client": "^4.7.2",
     "notistack": "^3.0.1",
     "styled-components": "^5.3.11",
     "lucide-react": "^0.344.0",
-    "firebase": "^10.7.0"
+    "firebase": "^10.7.0",
+    "axios": "^1.6.2"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",
@@ -28,4 +30,5 @@
     "vite-plugin-svgr": "^3.2.0"
   }
 }
+
 

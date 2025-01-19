@@ -1,0 +1,43 @@
+.messageList {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 1rem;
+  }
+  
+  .message {
+    max-width: 70%;
+    margin-bottom: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 1rem;
+  }
+  
+  .sent {
+    align-self: flex-end;
+    background-color: #4a90e2;
+    color: white;
+  }
+  
+  .received {
+    align-self: flex-start;
+    background-color: #f1f0f0;
+  }
+  
+  .username {
+    font-weight: bold;
+    font-size: 0.8rem;
+    margin-bottom: 0.2rem;
+  }
+  
+  .messageText {
+    margin: 0;
+  }
+  
+  .timestamp {
+    font-size: 0.7rem;
+    opacity: 0.7;
+    margin-top: 0.2rem;
+    display: block;
+  }
+  
+  
