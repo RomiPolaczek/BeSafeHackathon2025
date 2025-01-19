@@ -9,6 +9,7 @@ import MessageInput from '../../components/MessageInput/MessageInput';
 import MessageList from '../../components/MessageList/MessageList';
 import LastSeen from '../../components/LastSeen/LastSeen';
 import styles from './ChatPage.module.css';
+import FeedbackModal from "@/components/FeedbackModal/FeedbackModal";
 
 const ChatPage = () => {
   const [selectedConversation, setSelectedConversation] = useState(null);
@@ -19,8 +20,28 @@ const ChatPage = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [lastSeen, setLastSeen] = useState({});
   const [feedback, setFeedback] = useState('');  // For holding message feedback for the content check
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false); // for the UI content check modal
   const messageListRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+
+  const closeFeedbackModal = () => {
+    setIsFeedbackModalOpen(false);
+    setFeedback('');
+  };
+
+  const handleEmailTrustedAdult = () => {
+    const emailBody = `
+    Hello,
+    I need to report a concerning message in a chat. Please help me review it.
+    Feedback: ${feedback}
+  `;
+
+    //  adjust the recipient email address as needed.
+    const mailtoLink = `mailto:trustedadult@example.com?subject=Chat Message Feedback&body=${encodeURIComponent(emailBody)}`;
+    window.location.href = mailtoLink;  // Opens the email client
+  };
+
+
 
   useEffect(() => {
     const newSocket = io('http://localhost:3001', {
@@ -36,13 +57,14 @@ const ChatPage = () => {
       updateConversations(message);
     });
 
-    // Listen for feedback from the server
-    newSocket.on('message feedback', (data) => {
-      if (!data.success) {
-        setFeedback(data.message); // Set feedback message
-        console.log(data.message);
-      }
-    });
+    // // Listen for feedback from the server - i don't need this anymore because of the ONCE check!
+    // newSocket.on('message feedback', (data) => {
+    //   if (!data.success) {
+    //     setFeedback(data.message); // Set feedback message
+    //     setIsFeedbackModalOpen(true); // Open the modal
+    //
+    //   }
+    // });
 
     newSocket.on('user typing', ({ userId, username }) => {
       if (selectedConversation && userId === selectedConversation.id) {
@@ -124,11 +146,25 @@ const ChatPage = () => {
         socket.emit('stop typing', selectedConversation.id);
 
         // Add message locally
-        setMessages(prevMessages => [...prevMessages, messageData]);
-        updateConversations(messageData);
+        // setMessages(prevMessages => [...prevMessages, messageData]);
+        // updateConversations(messageData);
 
 
-        // Clear the feedback after sending the message
+        // Wait for the feedback from the server (message safety check)
+        socket.once('message feedback', (data) => {
+          if (data.success) {
+            // If the message is safe, add it locally
+            setMessages(prevMessages => [...prevMessages, messageData]);
+            updateConversations(messageData);
+          } else {
+            // If the message is unsafe, display feedback and do not add it
+            // TODO: if we want the person to be able to change their response, this should change.
+            setFeedback(data.message); // Set feedback message
+            setIsFeedbackModalOpen(true); // Open feedback modal
+          }
+        });
+
+          // Clear the feedback after sending the message
         setFeedback('');
       } catch (error) {
         console.error('Error sending message:', error);
@@ -214,7 +250,14 @@ const ChatPage = () => {
               onTyping={handleTyping}
               currentUser={currentUser}
             />
-            {feedback && <div className={styles.feedback}>{feedback}</div>} {/* Display feedback */}
+            {/*{feedback && <div className={styles.feedback}>{feedback}</div>} /!* Display feedback *!/*/}
+            <FeedbackModal
+                isOpen={isFeedbackModalOpen}
+                feedback={feedback}
+                onClose={closeFeedbackModal}
+                onEmailTrustedAdult={handleEmailTrustedAdult}
+            />
+
           </>
         ) : (
           <div className={styles.emptyState}>
