@@ -19,7 +19,7 @@
 
 .logoutButton {
   padding: 10px 20px;
-  background-color: #f44336;
+  background-color: #f436b5;
   color: white;
   border: none;
   border-radius: 5px;
@@ -29,12 +29,12 @@
 }
 
 .logoutButton:hover {
-  background-color: #d32f2f;
+  background-color: #d32f94;
 }
 
 .chatListTitle {
   font-size: 1.5em;
-  color: #2613a4;
+  color: #dd16dd;
   margin-bottom: 20px;
 }
 
@@ -56,7 +56,7 @@
 }
 
 .navLink {
-  color: #2613a4;
+  color: #a41368;
   text-decoration: none;
   font-size: 1.2em;
   display: block;

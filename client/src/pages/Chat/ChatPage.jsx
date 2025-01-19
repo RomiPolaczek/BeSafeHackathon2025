@@ -2,117 +2,10 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import io from 'socket.io-client';
 import { useAuth } from '../../contexts/AuthContext';
-import UserSearch from '../../components/UserSearch';
-import styled from 'styled-components';
-
-const ChatContainer = styled.div`
-  display: flex;
-  height: calc(100vh - 120px);
-  margin: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-`;
-
-const Sidebar = styled.div`
-  width: 300px;
-  border-right: 1px solid #ddd;
-  padding: 20px;
-  overflow-y: auto;
-  background: #f8f9fa;
-`;
-
-const ChatArea = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  background: white;
-`;
-
-const ChatHeader = styled.div`
-  padding: 20px;
-  border-bottom: 1px solid #ddd;
-  background: #f8f9fa;
-`;
-
-const MessageList = styled.div`
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-`;
-
-const Message = styled.div`
-  max-width: 70%;
-  padding: 10px 15px;
-  margin: ${props => props.$isSent ? '0 0 0 auto' : '0'};
-  border-radius: 15px;
-  background-color: ${props => props.$isSent ? '#4a90e2' : '#f0f0f0'};
-  color: ${props => props.$isSent ? 'white' : 'black'};
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  word-break: break-word;
-`;
-
-const InputArea = styled.div`
-  padding: 20px;
-  border-top: 1px solid #ddd;
-  background: #f8f9fa;
-  display: flex;
-  gap: 10px;
-`;
-
-const MessageInput = styled.input`
-  flex: 1;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 25px;
-  font-size: 16px;
-  outline: none;
-  transition: border-color 0.3s;
-
-  &:focus {
-    border-color: #4a90e2;
-  }
-`;
-
-const SendButton = styled.button`
-  padding: 12px 24px;
-  background-color: #4a90e2;
-  color: white;
-  border: none;
-  border-radius: 25px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s;
-
-  &:hover {
-    background-color: #357abd;
-  }
-
-  &:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-  }
-`;
-
-const TypingIndicator = styled.div`
-  padding: 10px 20px;
-  color: #666;
-  font-style: italic;
-  font-size: 14px;
-`;
-
-const EmptyState = styled.div`
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #666;
-  font-size: 18px;
-  padding: 20px;
-`;
+import UserSearch from '../../components/UserSearch'; // Updated import path
+import TypingIndicator from '../../components/TypingIndicator/TypingIndicator';
+import { Send, Paperclip } from 'lucide-react';
+import styles from './ChatPage.module.css';
 
 const ChatPage = () => {
   const [selectedUser, setSelectedUser] = useState(null);
@@ -152,7 +45,7 @@ const ChatPage = () => {
     setSocket(newSocket);
 
     return () => newSocket.close();
-  }, [currentUser.token]);
+  }, [currentUser.token, selectedUser]);
 
   useEffect(() => {
     if (messageListRef.current) {
@@ -182,18 +75,16 @@ const ChatPage = () => {
     if (newMessage.trim() && selectedUser) {
       try {
         const messageData = {
-          id: Date.now(), // Temporary ID for local state
+          id: Date.now(),
           content: newMessage.trim(),
           recipientId: selectedUser.id,
-          senderId: currentUser.id, // Add sender ID
+          senderId: currentUser.id,
           type: 'text',
           timestamp: new Date()
         };
         
-        // Add message to local state immediately
         setMessages(prevMessages => [...prevMessages, messageData]);
         
-        // Emit to socket
         socket.emit('chat message', messageData);
         setNewMessage('');
         socket.emit('stop typing', selectedUser.id);
@@ -221,54 +112,59 @@ const ChatPage = () => {
   };
 
   return (
-    <ChatContainer>
-      <Sidebar>
+    <div className={styles.chatContainer}>
+      <div className={styles.sidebar}>
         <UserSearch onSelectUser={handleUserSelect} />
-      </Sidebar>
-      <ChatArea>
+      </div>
+      <div className={styles.chatArea}>
         {selectedUser ? (
           <>
-            <ChatHeader>
-              <h2>Chat with {selectedUser.username}</h2>
-            </ChatHeader>
-            <MessageList ref={messageListRef}>
+            <div className={styles.chatHeader}>
+              <div className={styles.avatar}>{selectedUser.username[0].toUpperCase()}</div>
+              <div className={styles.userInfo}>
+                <h2 className={styles.username}>{selectedUser.username}</h2>
+                <span className={styles.userStatus}>Online</span>
+              </div>
+            </div>
+            <div className={styles.messageList} ref={messageListRef}>
               {messages.map((message, index) => (
-                <Message 
+                <div 
                   key={message.id || index} 
-                  $isSent={message.senderId === currentUser.id}
+                  className={`${styles.messageBubble} ${message.senderId === currentUser.id ? styles.sent : styles.received}`}
                 >
                   {message.content}
-                </Message>
+                </div>
               ))}
-            </MessageList>
-            {isTyping && (
-              <TypingIndicator>
-                {selectedUser.username} is typing...
-              </TypingIndicator>
-            )}
-            <InputArea>
-              <form onSubmit={handleSendMessage} style={{ display: 'flex', gap: '10px', width: '100%' }}>
-                <MessageInput
+            </div>
+            {isTyping && <TypingIndicator username={selectedUser.username} />}
+            <div className={styles.inputArea}>
+              <form className={styles.inputForm} onSubmit={handleSendMessage}>
+                <button type="button" className={styles.iconButton}>
+                  <Paperclip size={20} />
+                </button>
+                <input
                   type="text"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onInput={handleTyping}
                   placeholder="Type a message..."
+                  className={styles.messageInput}
                   autoComplete="off"
                 />
-                <SendButton type="submit" disabled={!newMessage.trim()}>
-                  Send
-                </SendButton>
+                <button type="submit" className={styles.iconButton} disabled={!newMessage.trim()}>
+                  <Send size={20} />
+                </button>
               </form>
-            </InputArea>
+            </div>
           </>
         ) : (
-          <EmptyState>
+          <div className={styles.emptyState}>
+            <div className={styles.emptyStateIcon}>💬</div>
             Select a user to start chatting
-          </EmptyState>
+          </div>
         )}
-      </ChatArea>
-    </ChatContainer>
+      </div>
+    </div>
   );
 };
 

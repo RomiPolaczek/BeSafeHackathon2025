@@ -1,77 +1,175 @@
-.chatPageContainer {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    background-color: #f0f2f5;
-    text-align: center;
-    padding: 20px;
-  }
-  
-  .chatContent {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    overflow: hidden;
-    margin-top: 20px;
-    border: 1px solid #ddd;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-  }
-  
-  .title {
-    font-size: 2em;
-    color: #2613a4;
-    margin-bottom: 10px;
-  }
-  
-  .text {
-    font-size: 1.2em;
-    margin-top: 10px;
-    color: #6a6a6a;
-  }
-  
-  .searchAndMessages {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    overflow: hidden;
-    padding: 20px;
-  }
-  
-  .messageList {
-    flex: 1;
-    overflow-y: auto;
-    margin-bottom: 20px;
-  }
-  
-  .inputArea {
-    display: flex;
-    padding: 10px;
-    background-color: #fff;
-    border-top: 1px solid #ddd;
-  }
-  
-  .reconnectingMessage {
-    background-color: #ff6b6b;
-    color: white;
-    padding: 10px;
-    text-align: center;
-    margin-bottom: 10px;
-  }
-  
-  .typingIndicator {
-    font-style: italic;
-    color: #6a6a6a;
-    padding: 5px 0;
-  }
-  
-  .chatWindow {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  
+.chatContainer {
+  display: flex;
+  height: calc(100vh - 100px);
+  margin: 20px 20px 40px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 300px;
+  border-right: 1px solid #e0e0e0;
+  background: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+}
+
+.chatArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: white;
+}
+
+.chatHeader {
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #ff69b4;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-right: 15px;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.username {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.userStatus {
+  font-size: 14px;
+  color: #888;
+}
+
+.messageList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.messageBubble {
+  max-width: 70%;
+  padding: 12px 18px;
+  border-radius: 18px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.messageBubble.sent {
+  background-color: #ff69b4;
+  color: white;
+  align-self: flex-end;
+}
+
+.messageBubble.received {
+  background-color: #f0f0f0;
+  color: #333;
+  align-self: flex-start;
+}
+
+.messageBubble.sent::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: -8px;
+  border-left: 8px solid #ff69b4;
+  border-top: 8px solid transparent;
+}
+
+.messageBubble.received::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: -8px;
+  border-right: 8px solid #f0f0f0;
+  border-top: 8px solid transparent;
+}
+
+.inputArea {
+  padding: 20px;
+  background: #ffffff;
+  border-top: 1px solid #e0e0e0;
+}
+
+.inputForm {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.messageInput {
+  flex: 1;
+  padding: 12px 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 25px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.messageInput:focus {
+  border-color: #4a90e2;
+}
+
+.iconButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #ff69b4;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s;
+}
+
+.iconButton:hover {
+  background-color: rgba(255, 105, 180, 0.1);
+}
+
+.iconButton:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+.emptyState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-size: 18px;
+  padding: 20px;
+}
+
+.emptyStateIcon {
+  font-size: 48px;
+  margin-bottom: 20px;
+  color: #4a90e2;
+}
+

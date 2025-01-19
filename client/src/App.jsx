@@ -38,13 +38,14 @@ const Main = styled.main`
 `;
 
 const Footer = styled.footer`
-  background-color: #2613a4;
+  background-color: #FF69B4; // Changed to pink
   color: white;
   text-align: center;
-  padding: 10px 0;
+  padding: 5px 0;
   position: fixed;
   bottom: 0;
   width: 100%;
+  font-size: 12px; // Reduced font size
 `;
 
 function App() {
@@ -71,7 +72,7 @@ function App() {
             </Routes>
           </Main>
           <Footer>
-            <p>&copy; 2023 SafeChat. All rights reserved.</p>
+            <p>&copy; 2023 SafeChat</p>
           </Footer>
         </AppContainer>
       </Router>

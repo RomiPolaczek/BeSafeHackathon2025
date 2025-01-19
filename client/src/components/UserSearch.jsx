@@ -1,36 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
-import styled from 'styled-components';
-
-const SearchContainer = styled.div`
-  margin-bottom: 20px;
-`;
-
-const SearchInput = styled.input`
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-`;
-
-const UserList = styled.ul`
-  list-style-type: none;
-  padding: 0;
-`;
-
-const UserItem = styled.li`
-  padding: 10px;
-  border: 1px solid #ddd;
-  margin-bottom: 5px;
-  cursor: pointer;
-  border-radius: 5px;
-
-  &:hover {
-    background-color: #f0f0f0;
-  }
-`;
+import styles from './UserSearch.module.css';
+import { Search } from 'lucide-react';
 
 const UserSearch = ({ onSelectUser }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -61,21 +33,26 @@ const UserSearch = ({ onSelectUser }) => {
   };
 
   return (
-    <SearchContainer>
-      <SearchInput
-        type="text"
-        placeholder="Search for users"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-      />
-      <UserList>
+    <div className={styles.searchContainer}>
+      <div className={styles.searchInputWrapper}>
+        <Search className={styles.searchIcon} size={20} />
+        <input
+          type="text"
+          placeholder="Search users..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className={styles.searchInput}
+        />
+      </div>
+      <ul className={styles.userList}>
         {searchResults.map(user => (
-          <UserItem key={user.id} onClick={() => onSelectUser(user)}>
-            {user.username}
-          </UserItem>
+          <li key={user.id} onClick={() => onSelectUser(user)} className={styles.userItem}>
+            <div className={styles.userAvatar}>{user.username[0].toUpperCase()}</div>
+            <span className={styles.userName}>{user.username}</span>
+          </li>
         ))}
-      </UserList>
-    </SearchContainer>
+      </ul>
+    </div>
   );
 };
 

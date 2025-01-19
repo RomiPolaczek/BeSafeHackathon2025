@@ -10,7 +10,7 @@
 
 .title {
   font-size: 2rem;
-  color: #2613a4;
+  color: #ea3c7c;
   margin-bottom: 20px;
 }
 
@@ -44,14 +44,14 @@
 
 .input:focus {
   outline: none;
-  border-color: #2613a4;
+  border-color: #a4136c;
   box-shadow: 0 0 0 2px rgba(38, 19, 164, 0.2);
 }
 
 .button {
   width: 100%;
   padding: 10px;
-  background-color: #2613a4;
+  background-color: #b33fa1;
   color: #ffffff;
   border: none;
   border-radius: 4px;
@@ -61,7 +61,7 @@
 }
 
 .button:hover {
-  background-color: #1e0f87;
+  background-color: #e41b7f;
 }
 
 .button:disabled {
@@ -81,7 +81,7 @@
 }
 
 .link {
-  color: #2613a4;
+  color: #a41380;
   text-decoration: none;
   font-weight: bold;
 }
