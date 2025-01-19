@@ -38,14 +38,14 @@ const Main = styled.main`
 `;
 
 const Footer = styled.footer`
-  background-color: #FF69B4; // Changed to pink
+  background-color: #FF69B4;
   color: white;
   text-align: center;
   padding: 5px 0;
   position: fixed;
   bottom: 0;
   width: 100%;
-  font-size: 12px; // Reduced font size
+  font-size: 12px;
 `;
 
 function App() {

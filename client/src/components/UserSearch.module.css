@@ -1,70 +1,70 @@
 .searchContainer {
-    padding: 20px;
-    border-bottom: 1px solid #e0e0e0;
-  }
-  
-  .searchInputWrapper {
-    position: relative;
-  }
-  
-  .searchIcon {
-    position: absolute;
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #888;
-  }
-  
-  .searchInput {
-    width: 100%;
-    padding: 12px 20px 12px 40px;
-    border: 1px solid #e0e0e0;
-    border-radius: 25px;
-    font-size: 16px;
-    outline: none;
-    transition: border-color 0.3s;
-  }
-  
-  .searchInput:focus {
-    border-color: #4a90e2;
-  }
-  
-  .userList {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    overflow-y: auto;
-    max-height: calc(100vh - 200px);
-  }
-  
-  .userItem {
-    padding: 15px 20px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    display: flex;
-    align-items: center;
-  }
-  
-  .userItem:hover {
-    background-color: #f0f0f0;
-  }
-  
-  .userAvatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: #4a90e2;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    margin-right: 15px;
-  }
-  
-  .userName {
-    font-size: 16px;
-    color: #333;
-  }
-  
-  
+  padding: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.searchInputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 8px;
+  color: #888;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 8px 8px 8px 32px;
+  border: 1px solid #e0e0e0;
+  border-radius: 16px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.searchInput:focus {
+  border-color: #ff69b4;
+}
+
+.userList {
+  list-style-type: none;
+  padding: 0;
+  margin: 10px 0 0 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.userItem {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.userItem:hover {
+  background-color: #f0f0f0;
+}
+
+.userAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #ff69b4;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-right: 10px;
+  font-size: 14px;
+}
+
+.userName {
+  font-size: 14px;
+  color: #333;
+}
+

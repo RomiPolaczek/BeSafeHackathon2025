@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { Search } from 'lucide-react';
+import styles from './UserSearch.module.css';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
-import styles from './UserSearch.module.css';
-import { Search } from 'lucide-react';
 
 const UserSearch = ({ onSelectUser }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -35,7 +35,7 @@ const UserSearch = ({ onSelectUser }) => {
   return (
     <div className={styles.searchContainer}>
       <div className={styles.searchInputWrapper}>
-        <Search className={styles.searchIcon} size={20} />
+        <Search className={styles.searchIcon} size={16} />
         <input
           type="text"
           placeholder="Search users..."
@@ -44,14 +44,16 @@ const UserSearch = ({ onSelectUser }) => {
           className={styles.searchInput}
         />
       </div>
-      <ul className={styles.userList}>
-        {searchResults.map(user => (
-          <li key={user.id} onClick={() => onSelectUser(user)} className={styles.userItem}>
-            <div className={styles.userAvatar}>{user.username[0].toUpperCase()}</div>
-            <span className={styles.userName}>{user.username}</span>
-          </li>
-        ))}
-      </ul>
+      {searchResults.length > 0 && (
+        <ul className={styles.userList}>
+          {searchResults.map(user => (
+            <li key={user.id} onClick={() => onSelectUser(user)} className={styles.userItem}>
+              <div className={styles.userAvatar}>{user.username[0].toUpperCase()}</div>
+              <span className={styles.userName}>{user.username}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };

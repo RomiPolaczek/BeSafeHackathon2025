@@ -1,38 +1,123 @@
+.inputContainer {
+  background-color: #ffffff;
+  padding: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
 .inputForm {
-    display: flex;
-    padding: 1rem;
-    background-color: white;
-    border-top: 1px solid #e0e0e0;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.inputWrapper {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  background-color: #f0f2f5;
+  border-radius: 24px;
+  padding: 8px 16px;
+  transition: background-color 0.3s ease;
+}
+
+.inputWrapper:focus-within {
+  background-color: #ffffff;
+  box-shadow: 0 0 0 2px #ff69b4;
+}
+
+.messageInput {
+  flex: 1;
+  border: none;
+  background: none;
+  padding: 8px 12px;
+  font-size: 15px;
+  color: #1c1e21;
+  outline: none;
+  min-height: 20px;
+  line-height: 20px;
+}
+
+.messageInput::placeholder {
+  color: #65676b;
+}
+
+.messageInput:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.iconButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: none;
+  border-radius: 50%;
+  color: #ff69b4;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.iconButton:hover {
+  background-color: rgba(255, 105, 180, 0.1);
+}
+
+.iconButton:active {
+  transform: scale(0.95);
+}
+
+.imageUploadInput {
+  display: none;
+}
+
+.sendButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background-color: #ff69b4;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.sendButton:hover:not(.disabled) {
+  background-color: #ff45a4;
+  transform: scale(1.05);
+}
+
+.sendButton:active:not(.disabled) {
+  transform: scale(0.95);
+}
+
+.sendButton.disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+  .inputContainer {
+    padding: 12px;
   }
-  
-  .messageInput {
-    flex-grow: 1;
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    margin-right: 0.5rem;
+
+  .iconButton {
+    width: 32px;
+    height: 32px;
   }
-  
-  .sendButton,
-  .showAllButton {
-    padding: 0.5rem 1rem;
-    background-color: #4a90e2;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+
+  .sendButton {
+    width: 36px;
+    height: 36px;
   }
-  
-  .sendButton:disabled,
-  .showAllButton:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-  }
-  
-  .showAllButton {
-    margin-left: 0.5rem;
-    background-color: #f1f0f0;
-    color: #333;
-  }
-  
-  
+}
+

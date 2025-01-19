@@ -7,6 +7,7 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import multer from 'multer';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,17 +24,28 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../client/dist')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const JWT_SECRET = 'your_jwt_secret'; // In a real application, this should be an environment variable
 
-const users = [];
+const users = [
+  { id: 1, username: 'user1', password: 'password1' },
+  { id: 2, username: 'user2', password: 'password2' },
+  { id: 3, username: 'user3', password: 'password3' },
+];
+
 const messages = [];
+const conversations = new Map();
 const activeUsers = new Map();
 
-// Set up multer for file uploads
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)){
+  fs.mkdirSync(uploadsDir);
+}
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../client/public/uploads/'))
+    cb(null, uploadsDir)
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + path.extname(file.originalname))
@@ -42,24 +54,29 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// File upload route
-app.post('/api/upload', upload.single('file'), (req, res) => {
-  if (req.file) {
-    res.json({ filename: `/uploads/${req.file.filename}` });
-  } else {
-    res.status(400).send('No file uploaded.');
-  }
-});
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (token == null) return res.sendStatus(401);
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+};
 
 app.post('/api/register', async (req, res) => {
   const { username, password } = req.body;
-  
+
   if (users.find(u => u.username === username)) {
     return res.status(400).json({ message: 'Username already exists' });
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const user = { id: users.length + 1, username, password: hashedPassword };
+  
+const user = { id: users.length + 1, username, password: hashedPassword };
   users.push(user);
 
   const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET);
@@ -78,19 +95,6 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (token == null) return res.sendStatus(401);
-
-  jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) return res.sendStatus(403);
-    req.user = user;
-    next();
-  });
-};
-
 app.get('/api/users/search', authenticateToken, (req, res) => {
   const { query } = req.query;
   const searchResults = users
@@ -99,14 +103,47 @@ app.get('/api/users/search', authenticateToken, (req, res) => {
   res.json(searchResults);
 });
 
+app.get('/api/conversations', authenticateToken, (req, res) => {
+  const userConversations = Array.from(conversations.values())
+    .filter(conv => conv.participants.includes(req.user.id))
+    .map(conv => {
+      const otherUser = users.find(u => u.id !== req.user.id && conv.participants.includes(u.id));
+      return {
+        id: conv.id,
+        username: otherUser.username,
+        lastMessage: conv.messages[conv.messages.length - 1]?.content || '',
+        lastMessageTimestamp: conv.messages[conv.messages.length - 1]?.timestamp || Date.now()
+      };
+    })
+    .sort((a, b) => b.lastMessageTimestamp - a.lastMessageTimestamp);
+
+  res.json(userConversations);
+});
+
 app.get('/api/messages', authenticateToken, (req, res) => {
   const { userId } = req.query;
-  const conversationMessages = messages.filter(
-    msg => (msg.senderId === req.user.id && msg.recipientId === parseInt(userId)) ||
-           (msg.senderId === parseInt(userId) && msg.recipientId === req.user.id)
-  );
-  res.json(conversationMessages);
+  const conversationId = getConversationId(req.user.id, parseInt(userId));
+  const conversation = conversations.get(conversationId);
+  
+  if (conversation) {
+    res.json(conversation.messages);
+  } else {
+    res.json([]);
+  }
 });
+
+app.post('/api/upload', authenticateToken, upload.single('image'), (req, res) => {
+  if (req.file) {
+    const imageUrl = `/uploads/${req.file.filename}`;
+    res.json({ imageUrl });
+  } else {
+    res.status(400).send('No file uploaded.');
+  }
+});
+
+function getConversationId(user1Id, user2Id) {
+  return [user1Id, user2Id].sort().join('-');
+}
 
 io.use((socket, next) => {
   const token = socket.handshake.auth.token;
@@ -126,15 +163,25 @@ io.on('connection', (socket) => {
   socket.join(socket.user.id.toString());
 
   socket.on('chat message', (msg) => {
+    const conversationId = getConversationId(socket.user.id, msg.recipientId);
+    if (!conversations.has(conversationId)) {
+      conversations.set(conversationId, {
+        id: conversationId,
+        participants: [socket.user.id, msg.recipientId],
+        messages: []
+      });
+    }
+    
     const message = {
-      id: messages.length + 1,
+      id: Date.now(),
       senderId: socket.user.id,
       recipientId: msg.recipientId,
       content: msg.content,
       type: msg.type,
       timestamp: new Date()
     };
-    messages.push(message);
+    
+    conversations.get(conversationId).messages.push(message);
     io.to(msg.recipientId.toString()).emit('chat message', message);
     updateLastSeen(socket.user.id);
   });

@@ -2,16 +2,18 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import io from 'socket.io-client';
 import { useAuth } from '../../contexts/AuthContext';
-import UserSearch from '../../components/UserSearch'; // Updated import path
+import ConversationList from '../../components/ConversationList/ConversationList';
+import UserSearch from '../../components/UserSearch';
 import TypingIndicator from '../../components/TypingIndicator/TypingIndicator';
-import { Send, Paperclip } from 'lucide-react';
+import MessageInput from '../../components/MessageInput/MessageInput';
+import MessageList from '../../components/MessageList/MessageList';
 import styles from './ChatPage.module.css';
 
 const ChatPage = () => {
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedConversation, setSelectedConversation] = useState(null);
+  const [conversations, setConversations] = useState([]);
   const { currentUser } = useAuth();
   const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState('');
   const [socket, setSocket] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
   const messageListRef = useRef(null);
@@ -28,16 +30,17 @@ const ChatPage = () => {
 
     newSocket.on('chat message', (message) => {
       setMessages(prevMessages => [...prevMessages, message]);
+      updateConversations(message);
     });
 
     newSocket.on('user typing', ({ userId, username }) => {
-      if (selectedUser && userId === selectedUser.id) {
+      if (selectedConversation && userId === selectedConversation.id) {
         setIsTyping(true);
       }
     });
 
     newSocket.on('user stop typing', ({ userId }) => {
-      if (selectedUser && userId === selectedUser.id) {
+      if (selectedConversation && userId === selectedConversation.id) {
         setIsTyping(false);
       }
     });
@@ -45,7 +48,7 @@ const ChatPage = () => {
     setSocket(newSocket);
 
     return () => newSocket.close();
-  }, [currentUser.token, selectedUser]);
+  }, [currentUser.token, selectedConversation]);
 
   useEffect(() => {
     if (messageListRef.current) {
@@ -53,10 +56,25 @@ const ChatPage = () => {
     }
   }, [messages]);
 
+  const fetchConversations = useCallback(async () => {
+    try {
+      const response = await axios.get('http://localhost:3001/api/conversations', {
+        headers: { Authorization: `Bearer ${currentUser.token}` }
+      });
+      setConversations(response.data);
+    } catch (error) {
+      console.error('Error fetching conversations:', error);
+    }
+  }, [currentUser.token]);
+
+  useEffect(() => {
+    fetchConversations();
+  }, [fetchConversations]);
+
   const fetchMessages = useCallback(async () => {
-    if (selectedUser) {
+    if (selectedConversation) {
       try {
-        const response = await axios.get(`http://localhost:3001/api/messages?userId=${selectedUser.id}`, {
+        const response = await axios.get(`http://localhost:3001/api/messages?userId=${selectedConversation.id}`, {
           headers: { Authorization: `Bearer ${currentUser.token}` }
         });
         setMessages(response.data);
@@ -64,30 +82,29 @@ const ChatPage = () => {
         console.error('Error fetching messages:', error);
       }
     }
-  }, [selectedUser, currentUser.token]);
+  }, [selectedConversation, currentUser.token]);
 
   useEffect(() => {
     fetchMessages();
   }, [fetchMessages]);
 
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (newMessage.trim() && selectedUser) {
+  const handleSendMessage = async (content, type) => {
+    if (content && selectedConversation) {
       try {
         const messageData = {
           id: Date.now(),
-          content: newMessage.trim(),
-          recipientId: selectedUser.id,
+          content,
+          recipientId: selectedConversation.id,
           senderId: currentUser.id,
-          type: 'text',
+          type,
           timestamp: new Date()
         };
         
         setMessages(prevMessages => [...prevMessages, messageData]);
+        updateConversations(messageData);
         
         socket.emit('chat message', messageData);
-        setNewMessage('');
-        socket.emit('stop typing', selectedUser.id);
+        socket.emit('stop typing', selectedConversation.id);
       } catch (error) {
         console.error('Error sending message:', error);
       }
@@ -95,19 +112,48 @@ const ChatPage = () => {
   };
 
   const handleTyping = () => {
-    if (selectedUser && socket) {
-      socket.emit('typing', selectedUser.id);
+    if (selectedConversation && socket) {
+      socket.emit('typing', selectedConversation.id);
       clearTimeout(typingTimeoutRef.current);
       typingTimeoutRef.current = setTimeout(() => {
-        socket.emit('stop typing', selectedUser.id);
+        socket.emit('stop typing', selectedConversation.id);
       }, 1000);
     }
   };
 
-  const handleUserSelect = (user) => {
-    setSelectedUser(user);
+  const updateConversations = (message) => {
+    setConversations(prevConversations => {
+      const updatedConversations = prevConversations.map(conv => {
+        if (conv.id === message.senderId || conv.id === message.recipientId) {
+          return { ...conv, lastMessage: message.content };
+        }
+        return conv;
+      });
+      return updatedConversations.sort((a, b) => b.lastMessageTimestamp - a.lastMessageTimestamp);
+    });
+  };
+
+  const handleSelectConversation = (conversation) => {
+    setSelectedConversation(conversation);
     setMessages([]);
-    setNewMessage('');
+    setIsTyping(false);
+  };
+
+  const handleUserSelect = (user) => {
+    const existingConversation = conversations.find(conv => conv.id === user.id);
+    if (existingConversation) {
+      setSelectedConversation(existingConversation);
+    } else {
+      const newConversation = {
+        id: user.id,
+        username: user.username,
+        lastMessage: '',
+        lastMessageTimestamp: Date.now()
+      };
+      setConversations(prevConversations => [newConversation, ...prevConversations]);
+      setSelectedConversation(newConversation);
+    }
+    setMessages([]);
     setIsTyping(false);
   };
 
@@ -115,52 +161,38 @@ const ChatPage = () => {
     <div className={styles.chatContainer}>
       <div className={styles.sidebar}>
         <UserSearch onSelectUser={handleUserSelect} />
+        <ConversationList
+          conversations={conversations}
+          onSelectConversation={handleSelectConversation}
+          selectedConversation={selectedConversation}
+        />
       </div>
       <div className={styles.chatArea}>
-        {selectedUser ? (
+        {selectedConversation ? (
           <>
             <div className={styles.chatHeader}>
-              <div className={styles.avatar}>{selectedUser.username[0].toUpperCase()}</div>
+              <div className={styles.avatar}>{selectedConversation.username[0].toUpperCase()}</div>
               <div className={styles.userInfo}>
-                <h2 className={styles.username}>{selectedUser.username}</h2>
+                <h2 className={styles.username}>{selectedConversation.username}</h2>
                 <span className={styles.userStatus}>Online</span>
               </div>
             </div>
-            <div className={styles.messageList} ref={messageListRef}>
-              {messages.map((message, index) => (
-                <div 
-                  key={message.id || index} 
-                  className={`${styles.messageBubble} ${message.senderId === currentUser.id ? styles.sent : styles.received}`}
-                >
-                  {message.content}
-                </div>
-              ))}
-            </div>
-            {isTyping && <TypingIndicator username={selectedUser.username} />}
-            <div className={styles.inputArea}>
-              <form className={styles.inputForm} onSubmit={handleSendMessage}>
-                <button type="button" className={styles.iconButton}>
-                  <Paperclip size={20} />
-                </button>
-                <input
-                  type="text"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onInput={handleTyping}
-                  placeholder="Type a message..."
-                  className={styles.messageInput}
-                  autoComplete="off"
-                />
-                <button type="submit" className={styles.iconButton} disabled={!newMessage.trim()}>
-                  <Send size={20} />
-                </button>
-              </form>
-            </div>
+            <MessageList 
+              messages={messages} 
+              currentUser={currentUser} 
+              ref={messageListRef}
+            />
+            {isTyping && <TypingIndicator username={selectedConversation.username} />}
+            <MessageInput 
+              onSendMessage={handleSendMessage} 
+              onTyping={handleTyping}
+              currentUser={currentUser}
+            />
           </>
         ) : (
           <div className={styles.emptyState}>
             <div className={styles.emptyStateIcon}>💬</div>
-            Select a user to start chatting
+            Select a conversation or start a new one
           </div>
         )}
       </div>
