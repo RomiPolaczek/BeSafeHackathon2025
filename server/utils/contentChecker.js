@@ -2,9 +2,6 @@ import OpenAIApi from 'openai';
 import dotenv from 'dotenv';
 dotenv.config();
 
-// const openai = new OpenAIApi({
-//   apiKey: process.env.OPENAI_API_KEY
-// });
 
 // mock AI
 export async function checkMessageContent(message) {
@@ -20,6 +17,9 @@ export async function checkMessageContent(message) {
   }
 }
 
+// const openai = new OpenAIApi({
+//   apiKey: process.env.OPENAI_API_KEY
+// });
 
 //using actual AI
 // TODO: comment out for actual AI

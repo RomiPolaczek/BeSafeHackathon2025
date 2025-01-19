@@ -18,6 +18,7 @@ const ChatPage = () => {
   const [socket, setSocket] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
   const [lastSeen, setLastSeen] = useState({});
+  const [feedback, setFeedback] = useState('');  // For holding message feedback for the content check
   const messageListRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
@@ -33,6 +34,14 @@ const ChatPage = () => {
     newSocket.on('chat message', (message) => {
       setMessages(prevMessages => [...prevMessages, message]);
       updateConversations(message);
+    });
+
+    // Listen for feedback from the server
+    newSocket.on('message feedback', (data) => {
+      if (!data.success) {
+        setFeedback(data.message); // Set feedback message
+        console.log(data.message);
+      }
     });
 
     newSocket.on('user typing', ({ userId, username }) => {
@@ -108,12 +117,19 @@ const ChatPage = () => {
           type,
           timestamp: new Date()
         };
-        
-        setMessages(prevMessages => [...prevMessages, messageData]);
-        updateConversations(messageData);
-        
+
+
+
         socket.emit('chat message', messageData);
         socket.emit('stop typing', selectedConversation.id);
+
+        // Add message locally
+        setMessages(prevMessages => [...prevMessages, messageData]);
+        updateConversations(messageData);
+
+
+        // Clear the feedback after sending the message
+        setFeedback('');
       } catch (error) {
         console.error('Error sending message:', error);
       }
@@ -198,6 +214,7 @@ const ChatPage = () => {
               onTyping={handleTyping}
               currentUser={currentUser}
             />
+            {feedback && <div className={styles.feedback}>{feedback}</div>} {/* Display feedback */}
           </>
         ) : (
           <div className={styles.emptyState}>
