@@ -1,123 +1,86 @@
-import React, { useState, useEffect } from 'react';
-import { SnackbarProvider } from 'notistack';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import Home from './pages/Home/HomePage';
+import Login from './pages/Login/LoginPage';
+import SignUp from './pages/SignUp/SignUpPage';
+import MainPage from './pages/MainPage/MainPage';
+import ChatPage from './pages/Chat/ChatPage';
+import PrivateRoute from './components/PrivateRoute';
+import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 import styled from 'styled-components';
-import Chat from './components/Chat';
-import ChatList from './components/ChatList';
-import LoginForm from './components/LoginForm';
-import UserProfile from './components/UserProfile';
-import { usePushNotifications } from './hooks/usePushNotifications';
-import useLocalStorage from './hooks/useLocalStorage';
-import './index.css';
-import { ThemeProvider } from 'styled-components';
-import { theme } from './assets/styles/theme';
 
 const AppContainer = styled.div`
-  display: flex;
-  height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+    "Droid Sans", "Helvetica Neue", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
 `;
 
-const NotificationButton = styled.button`
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  padding: ${({ theme }) => theme.spacing.small};
-  background-color: ${({ theme }) => theme.colors.primary};
-  color: ${({ theme }) => theme.colors.white};
-  border: none;
-  border-radius: ${({ theme }) => theme.borderRadius.small};
-  cursor: pointer;
-  z-index: 1000;
+const Header = styled.header`
+  background-color: #2613a4;
+  padding: 10px 20px;
+`;
+
+const Nav = styled.nav`
+  display: flex;
+  justify-content: space-between;
+`;
+
+const NavLink = styled(Link)`
+  color: white;
+  text-decoration: none;
+  margin-right: 15px;
 
   &:hover {
-    background-color: ${({ theme }) => `${theme.colors.primary}dd`};
+    text-decoration: underline;
   }
 `;
 
+const Main = styled.main`
+  padding: 20px;
+`;
+
+const Footer = styled.footer`
+  background-color: #FF69B4;
+  color: white;
+  text-align: center;
+  padding: 5px 0;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  font-size: 12px;
+`;
+
 function App() {
-  const [activeChat, setActiveChat] = useState(null);
-  const [user, setUser] = useLocalStorage('user', null);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [chats, setChats] = useLocalStorage('chats', [
-    { id: 1, name: 'General' },
-    { id: 2, name: 'Random' },
-    { id: 3, name: 'Tech Talk' },
-  ]);
-  const { isSubscribed, subscribeUser, unsubscribeUser } = usePushNotifications(user?.username);
-
-  const updateTabNotification = (count) => {
-    document.title = count > 0 ? `(${count}) New Messages - Chat` : 'Chat';
-  };
-
-  useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/service-worker.js')
-        .then(function(registration) {
-          console.log('Service Worker registered with scope:', registration.scope);
-        })
-        .catch(function(error) {
-          console.log('Service Worker registration failed:', error);
-        });
-    }
-  }, []);
-
-  const handleSelectChat = (chat) => {
-    setActiveChat(chat);
-    setUnreadCount(0);
-    updateTabNotification(0);
-  };
-
-  const handleCreateChat = (chatName) => {
-    const newChat = { id: Date.now(), name: chatName };
-    setChats([...chats, newChat]);
-    setActiveChat(newChat);
-  };
-
-  const handleUsernameSubmit = (username) => {
-    setUser({ username, avatar: 'https://via.placeholder.com/100', statusMessage: 'Available' });
-  };
-
-  const handleUpdateProfile = (updatedProfile) => {
-    setUser({ ...user, ...updatedProfile });
-  };
-
-  const handleNotificationToggle = () => {
-    if (isSubscribed) {
-      unsubscribeUser();
-    } else {
-      subscribeUser();
-    }
-  };
-
   return (
-    <ThemeProvider theme={theme}>
-      <SnackbarProvider maxSnack={3}>
-        {!user ? (
-          <LoginForm onSubmit={handleUsernameSubmit} />
-        ) : (
+    <ErrorBoundary>
+      <AuthProvider>
+        <Router>
           <AppContainer>
-            <ChatList 
-              chats={chats} 
-              activeChat={activeChat} 
-              onSelectChat={handleSelectChat}
-              onCreateChat={handleCreateChat}
-            />
-            {activeChat ? (
-              <Chat 
-                activeChat={activeChat} 
-                user={user} 
-                setUnreadCount={setUnreadCount} 
-                updateTabNotification={updateTabNotification}
-              />
-            ) : (
-              <UserProfile user={user} onUpdateProfile={handleUpdateProfile} />
-            )}
-            <NotificationButton onClick={handleNotificationToggle}>
-              {isSubscribed ? 'Disable Notifications' : 'Enable Notifications'}
-            </NotificationButton>
+            <Header>
+              <Nav>
+                <div>
+                  <NavLink to="/">Home</NavLink>
+                  <NavLink to="/login">Login</NavLink>
+                  <NavLink to="/signup">Sign Up</NavLink>
+                </div>
+              </Nav>
+            </Header>
+            <Main>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<SignUp />} />
+                <Route path="/main" element={<PrivateRoute><MainPage /></PrivateRoute>} />
+                <Route path="/chat" element={<PrivateRoute><ChatPage /></PrivateRoute>} />
+              </Routes>
+            </Main>
+            <Footer>
+              <p>&copy; 2023 SafeChat</p>
+            </Footer>
           </AppContainer>
-        )}
-      </SnackbarProvider>
-    </ThemeProvider>
+        </Router>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 

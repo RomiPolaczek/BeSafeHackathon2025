@@ -1,0 +1,29 @@
+.header {
+    background-color: #4a90e2;
+    color: white;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .chatTitle {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+  
+  .connectionStatus {
+    font-size: 0.9rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 1rem;
+  }
+  
+  .connected {
+    background-color: #4caf50;
+  }
+  
+  .disconnected {
+    background-color: #f44336;
+  }
+  
+  
