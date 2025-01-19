@@ -10,6 +10,7 @@ import multer from 'multer';
 import fs from 'fs';
 import webpush from 'web-push';
 import { checkMessageContent } from './utils/contentChecker.js'; // Adjust the path as necessary
+import { messageHistory } from './data/chatData.js';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -165,29 +166,38 @@ io.on('connection', (socket) => {
   activeUsers.set(socket.user.id, { username: socket.user.username, lastSeen: new Date() });
   socket.join(socket.user.id.toString());
 
-  socket.on('chat message', (msg) => {
-    const conversationId = getConversationId(socket.user.id, msg.recipientId);
-    if (!conversations.has(conversationId)) {
-      conversations.set(conversationId, {
+
+  socket.on('chat message', async (msg) => {
+    const isSafe =  await checkMessageContent(msg.content);
+
+    if(isSafe){
+      console.log('The message: "', msg.content, '" is safe');
+
+      const conversationId = getConversationId(socket.user.id, msg.recipientId);
+      if (!conversations.has(conversationId)) {
+        conversations.set(conversationId, {
         id: conversationId,
         participants: [socket.user.id, msg.recipientId],
         messages: []
-      });
+        });
+      }
+      const message = {
+        id: Date.now(),
+        senderId: socket.user.id,
+        recipientId: msg.recipientId,
+        content: msg.content,
+        type: msg.type,
+        timestamp: new Date()
+      };
+
+      messageHistory.push(message);  
+      conversations.get(conversationId).messages.push(message);
+      io.to(msg.recipientId.toString()).emit('chat message', message);
     }
-    
-    const message = {
-      id: Date.now(),
-      senderId: socket.user.id,
-      recipientId: msg.recipientId,
-      content: msg.content,
-      type: msg.type,
-      timestamp: new Date()
-    };
-    
-    conversations.get(conversationId).messages.push(message);
-    io.to(msg.recipientId.toString()).emit('chat message', message);
+
     updateLastSeen(socket.user.id);
   });
+
 
   socket.on('typing', (recipientId) => {
     socket.to(recipientId.toString()).emit('user typing', { userId: socket.user.id, username: socket.user.username });
