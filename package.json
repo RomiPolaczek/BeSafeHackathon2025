@@ -9,9 +9,11 @@
     "dev": "concurrently \"npm run server\" \"npm run client\""
   },
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "@fortawesome/fontawesome-free": "^6.7.2",
     "axios": "^1.7.9",
     "concurrently": "^6.2.0",
+    "nodemailer": "^6.9.16",
     "notistack": "^3.0.1",
     "prop-types": "^15.8.1",
     "react-router-dom": "^7.1.3",
