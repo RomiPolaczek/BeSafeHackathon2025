@@ -32,12 +32,13 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const register = async (username, password) => {
+  const register = async (username, password, securityEmail) => {
     try {
-      const response = await axios.post('http://localhost:3001/api/register', { username, password });
+      const response = await axios.post('http://localhost:3001/api/register', { username, password, securityEmail});
       const { token } = response.data;
       localStorage.setItem('token', token);
-      setCurrentUser({ token });
+      localStorage.setItem('securityEmail', securityEmail);
+      setCurrentUser({ token, securityEmail });
       return true;
     } catch (error) {
       console.error('Registration error:', error.response?.data?.message || error.message);
