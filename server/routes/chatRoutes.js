@@ -8,7 +8,7 @@ const setupSocketRoutes = (io) => {
     console.log('A user connected');
 
     socket.on('set username', (username) => chatController.setUsername(io, socket, username));
-    socket.on('chat message', (msg) => chatController.handleChatMessage(io, socket, msg));
+    socket.on('chat message', (input, type) => chatController.handleChatMessage(io, socket, msg));
     socket.on('typing', () => chatController.handleTyping(socket));
     socket.on('stop typing', () => chatController.handleStopTyping(socket));
     socket.on('disconnect', () => chatController.handleDisconnect(io, socket));

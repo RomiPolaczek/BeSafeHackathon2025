@@ -7,15 +7,14 @@ export const setUsername = (io, socket, username) => {
   socket.emit('message history', messageHistory);
 };
 
-export const handleChatMessage = (io, socket, msg) => {
+export const handleChatMessage = (io, socket, msg, type) => {
   const user = users.get(socket.id);
   if (user) {
-    const messageWithUser = { ...msg, username: user.username, timestamp: new Date() };
+    const messageWithUser = { ...msg, type, username: user.username, timestamp: new Date() };
     io.emit('chat message', messageWithUser);
     updateLastSeen(io, socket.id);
   }
 };
-
 
 export const handleTyping = (socket) => {
   const user = users.get(socket.id);
