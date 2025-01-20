@@ -1,7 +1,6 @@
 .emojiPickerContainer {
   position: relative;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-    sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
 }
 
 .emojiButton {
@@ -9,13 +8,13 @@
   border: none;
   cursor: pointer;
   font-size: 1.2rem;
-  color: #ff69b4;
+  color: #4C6085; /* Dark blue */
   transition: color 0.3s ease;
   padding: 5px;
 }
 
 .emojiButton:hover {
-  color: #ff45a4;
+  color: #93BEDF; /* Light blue */
 }
 
 .pickerContainer {
@@ -30,8 +29,7 @@
 
 /* Override emoji-mart styles */
 .pickerContainer :global(.emoji-mart) {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-    sans-serif !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif !important;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
 }
@@ -63,7 +61,6 @@
 }
 
 .pickerContainer :global(.emoji-mart-emoji:focus) {
-  outline: 2px solid #ff69b4;
+  outline: 2px solid #4C6085; /* Dark blue */
   border-radius: 4px;
 }
-

@@ -9,27 +9,40 @@ import ChatPage from './pages/Chat/ChatPage';
 import PrivateRoute from './components/PrivateRoute';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 import styled from 'styled-components';
+import { createGlobalStyle } from 'styled-components';
+
 
 const AppContainer = styled.div`
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
     "Droid Sans", "Helvetica Neue", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
 `;
 
+const GlobalStyle = createGlobalStyle`
+  body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    overflow-x: hidden; /* Prevents unwanted horizontal scrolling */
+  }
+`;
+
 const Header = styled.header`
-  //background-color: #2613a4;
-  //padding: 10px 20px;
-  background-color: #53474F;
-  padding: 5px 30px 5px 30px;
+ 
+  background-color: #4C6085;
+  padding: 10px 5px 10px 5px;
+
+  width: 100%;
+
+  position: fixed;
+  margin: 0;
   color: white;
-  display: flex;
   align-items: center;
   justify-content: space-between;
-  
+  top: 0;
 `;
 
 const Nav = styled.nav`
-  //display: flex;
-  //justify-content: space-between;
+  justify-content: space-between;
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -51,18 +64,23 @@ const Main = styled.main`
 `;
 
 const Footer = styled.footer`
-  background-color: #FF69B4;
+ background-color: #4C6085;
   color: white;
   text-align: center;
-  padding: 5px 0;
   position: fixed;
+  height: 25px;
   bottom: 0;
   width: 100%;
-  font-size: 12px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 function App() {
   return (
+    <>
+    <GlobalStyle></GlobalStyle>
     <ErrorBoundary>
       <AuthProvider>
         <Router>
@@ -92,6 +110,7 @@ function App() {
         </Router>
       </AuthProvider>
     </ErrorBoundary>
+    </>
   );
 }
 

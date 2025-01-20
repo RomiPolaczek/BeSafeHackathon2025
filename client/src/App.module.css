@@ -1,142 +1,41 @@
-/*.app {*/
-/*  text-align: center;*/
-/*}*/
-
-/*.appHeader {*/
-/*  background-color: #53474f;*/
-/*  padding: 5px 30px 5px 30px;*/
-/*  color: white;*/
-/*  display: flex;*/
-/*  align-items: center;*/
-/*  justify-content: space-between;*/
-/*}*/
-
-/*.appLogo {*/
-/*  height: 100px;*/
-/*}*/
-
-/*.appNav {*/
-/*  display: flex;*/
-/*  justify-content: flex-end;*/
-/*  align-items: center;*/
-/*}*/
-
-/*.appLink {*/
-/*  margin-left: 20px;*/
-/*  font-size: 16px;*/
-/*  text-decoration: none;*/
-/*  color: white;*/
-/*}*/
-
-/*.welcomeText {*/
-/*  font-size: 12px;*/
-/*  color: #ccc;*/
-/*  margin-left: 10px;*/
-/*}*/
-
-/*.logoutButton {*/
-/*  margin-left: 10px;*/
-/*  padding: 5px 10px;*/
-/*  background-color: #333;*/
-/*  color: white;*/
-/*  border: none;*/
-/*  cursor: pointer;*/
-/*}*/
-
-/*.logoutButton:hover {*/
-/*  background-color: #555;*/
-/*}*/
-
-/*.main {*/
-/*  padding: 20px;*/
-/*}*/
-
-/*.footer {*/
-/*  margin-top: auto;*/
-/*  padding: 20px;*/
-/*  background-color: #53474f;*/
-/*  color: white;*/
-/*}*/
-/*!* App.module.css *!*/
-/*.app {*/
-/*  text-align: center;*/
-/*}*/
-/*
-.appHeader {
-  background-color: #53474F;
-  padding: 5px 30px 5px 30px;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-*/
-/*.appLogo {*/
-/*  height: 100px;*/
-/*}*/
-/*.appNav {*/
-/*  display: flex;*/
-/*  justify-content: flex-end;*/
-/*  align-items: center;*/
-/*}*/
-/*.appLink {*/
-/*  margin-left: 20px;*/
-/*  font-size: 16px;*/
-/*  text-decoration: none;*/
-/*  color: white;*/
-/*}*/
-/*.guestText, .welcomeText {*/
-/*  font-size: 12px;*/
-/*  color: gray;*/
-/*  margin-left: 10px;*/
-/*}*/
-/*.logoutButton {*/
-/*  margin-left: 10px;*/
-/*  padding: 5px 10px;*/
-/*  background-color: #333;*/
-/*  color: white;*/
-/*  border: none;*/
-/*  cursor: pointer;*/
-/*}*/
-/*.logoutButton:hover {*/
-/*  background-color: #555;*/
-/*}*/
-
-
-/* orel code*/
-
-
-/* App.module.css */
+App.module.css
 .app {
   text-align: center;
 }
+
 .appHeader {
   background-color: #53474F;
-  padding: 5px 30px 5px 30px;
+  padding: 5px 30px;
   color: white;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
+
 .appLogo {
   height: 100px;
 }
+
 .appNav {
   display: flex;
   justify-content: flex-end;
   align-items: center;
 }
+
 .appLink {
   margin-left: 20px;
   font-size: 16px;
   text-decoration: none;
   color: white;
 }
-.guestText, .welcomeText {
+
+.guestText, 
+.welcomeText {
   font-size: 12px;
   color: gray;
   margin-left: 10px;
 }
+
 .logoutButton {
   margin-left: 10px;
   padding: 5px 10px;
@@ -145,6 +44,18 @@
   border: none;
   cursor: pointer;
 }
+
 .logoutButton:hover {
   background-color: #555;
+}
+
+.main {
+  padding: 20px;
+}
+
+.footer {
+  margin-top: auto;
+  padding: 20px;
+  background-color: #53474F;
+  color: white;
 }

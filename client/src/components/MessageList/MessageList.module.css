@@ -17,13 +17,13 @@
 
 .sent {
   align-self: flex-end;
-  background-color: #ff69b4;
+  background-color: #4C6085; /* Dark blue */
   color: white;
 }
 
 .received {
   align-self: flex-start;
-  background-color: #f0f0f0;
+  background-color: #93BEDF; /* Light blue */
   color: #333;
 }
 
@@ -47,4 +47,3 @@
   display: block;
   border-radius: 8px;
 }
-
