@@ -11,6 +11,10 @@ import fs from 'fs';
 import webpush from 'web-push';
 import { checkMessageContent } from './utils/contentChecker.js'; // Adjust the path as necessary
 import { messageHistory } from './data/chatData.js';
+import nodemailer from "nodemailer";
+// import dotenv from 'dotenv';
+// dotenv.config();
+
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -234,6 +238,39 @@ function updateLastSeen(userId) {
     io.emit('last seen update', { userId, username: user.username, lastSeen: user.lastSeen });
   }
 }
+
+// email
+app.post('/send-email', async (req, res) => {
+  const { recipientEmail, subject, body } = req.body;
+
+  try {
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com', // You can also use other email services
+      port: 587, // Secure SMTP port for Gmail
+      secure: false, // Use TLS
+      auth: {
+        user: "safechat71@gmail.com",
+        pass: "zbap qsuj epms kpxa",
+        // user: process.env.EMAIL_USER, // Your app's general email
+        // pass: process.env.EMAIL_PASS, // App password (not your personal password)
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER, // Sender's email address
+      to: recipientEmail, // Recipient's email address
+      subject, // Email subject
+      text: body, // Email body content
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.status(200).send('Email sent successfully');
+  } catch (error) {
+    console.error('Error sending email:', error);
+    res.status(500).send('Failed to send email');
+  }
+});
+
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {

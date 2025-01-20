@@ -10,6 +10,7 @@ import MessageList from '../../components/MessageList/MessageList';
 import LastSeen from '../../components/LastSeen/LastSeen';
 import styles from './ChatPage.module.css';
 import FeedbackModal from "@/components/FeedbackModal/FeedbackModal";
+import emailjs from '@emailjs/browser';
 
 const ChatPage = () => {
   const [selectedConversation, setSelectedConversation] = useState(null);
@@ -37,23 +38,54 @@ const ChatPage = () => {
 
   };
 
-  const handleEmailTrustedAdult = () => {
+  const handleEmailTrustedAdult = async () => {
     const emailBody = `
     Hello,
     Your child sent a concerning message in SafeChat, and we wanted to let you know.
-    This is the message: ${message}
+    This is the message:
+    Message: ${messageContent}
     Feedback: ${feedback}
   `;
-    //  adjust the recipient email address as needed.
-    const mailtoLink = `mailto:trustedadult@example.com?subject=Chat Message Feedback&body=${encodeURIComponent(emailBody)}`;
-    window.location.href = mailtoLink;  // Opens the email client
-    setIsFeedbackModalOpen(false);  // close modal
-    setFeedback('');
-    setClearMessage(false);
+
+    try {
+      await axios.post('http://localhost:3001/send-email', {
+        recipientEmail: 'safechat71@gmail.com', // TODO: Replace with the actual recipient email
+        subject: 'SafeChat Alert',
+        body: emailBody,
+      });
 
 
 
+      alert('Email sent successfully');
+    } catch (error) {
+      console.error('Error sending email:', error);
+      alert('Failed to send email');
+    }
+
+    setIsFeedbackModalOpen(false); // Close modal
+    setFeedback(''); // Clear feedback
+    setClearMessage(false); // Clear the message
   };
+
+
+
+  // const handleEmailTrustedAdult = () => {
+  //   const emailBody = `
+  //   Hello,
+  //   Your child sent a concerning message in SafeChat, and we wanted to let you know.
+  //   This is the message: ${message}
+  //   Feedback: ${feedback}
+  // `;
+  //   //  adjust the recipient email address as needed.
+  //   const mailtoLink = `mailto:trustedadult@example.com?subject=Chat Message Feedback&body=${encodeURIComponent(emailBody)}`;
+  //   window.location.href = mailtoLink;  // Opens the email client
+  //   setIsFeedbackModalOpen(false);  // close modal
+  //   setFeedback('');
+  //   setClearMessage(false);
+  //
+  //
+  //
+  // };
 
 
 
