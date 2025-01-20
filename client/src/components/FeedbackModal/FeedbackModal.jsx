@@ -10,7 +10,7 @@ const FeedbackModal = ({ isOpen, feedback, onClose, onEmailTrustedAdult }) => {
                 <h2>Are you sure about that?</h2>
                 <p>{feedback}</p>
                 <button onClick={onClose} className={styles.closeButton}>I get it! I'll write something else</button>
-                <button className={styles.emailButton} onClick={onEmailTrustedAdult}>Email a Trusted Adult</button>
+                <button className={styles.emailButton} onClick={onEmailTrustedAdult}>I'm okay, thanks</button>
             </div>
         </div>
     );
