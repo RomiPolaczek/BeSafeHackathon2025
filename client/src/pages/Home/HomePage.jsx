@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./HomePage.module.css";
+import photo from "../../assets/homePage-photo.png";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -13,37 +14,29 @@ const HomePage = () => {
     navigate('/signup');
   };
 
-  const handleAnonymousLogin = async () => {
-    try {
-      // For now, we'll just navigate to the main page
-      // In a real application, you'd implement anonymous authentication here
-      navigate('/main');
-    } catch (error) {
-      console.error('Error signing in anonymously:', error);
-      alert('An error occurred during anonymous sign-in. Please try again.');
-    }
-  };
-
   return (
     <div className={styles.homeContainer}>
-      <img 
-        src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/project-logo-aOREI8Hfta2vRT5AsPqVe6FDFMS7Go.png" 
-        alt="SafeChat Logo" 
-        className={styles.logo}
-      />
-      <h1 className={styles.headline}>SafeChat</h1>
+      {/* כותרת ראשית */}
+      <h1 className={styles.mainTitle}>Welcome to</h1>
+      
+      {/* כותרת משנית */}
+      <h2 className={styles.subTitle}>SafeChat!</h2>
       <h2 className={styles.subtitle}>
-        Welcome to SafeChat, the ultimate platform for secure and positive communication.
-        Here, your conversations are safe, respectful, and focused on spreading kindness.
+      Together, we're creating a safer space online!<br />
+      Join us on our journey to make the digital world a better place by empowering you with the tools and knowledge to feel confident, secure, and happy while connecting in the virtual space.
       </h2>
+
       <div className={styles.buttonsContainer}>
         <button onClick={handleLogin} className={styles.button}>Login</button>
         <button onClick={handleSignUp} className={styles.button}>Sign Up</button>
-        <button onClick={handleAnonymousLogin} className={styles.button}>Join Anonymously</button>
+      </div>
+
+      {/* הצגת התמונה */}
+      <div className={styles.imageContainer}>
+        <img src={photo} alt="SafeChat illustration" className={styles.image} />
       </div>
     </div>
   );
 };
 
 export default HomePage;
-

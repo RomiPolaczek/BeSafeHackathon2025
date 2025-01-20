@@ -1,64 +1,87 @@
-.homeContainer {
-  text-align: center;
-  padding: 20px;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.logo {
-  width: 120px;
-  height: auto;
-  margin-bottom: 20px;
+.home {
+  text-align: left;  /* שים את כל התוכן בצד שמאל */
+  padding: 40px 20px;  /* הגדלתי את הרווחים */
+  background-color: #ffffff;  /* רקע לבן */
 }
 
 .headline {
   font-size: 2.5em;
   margin-bottom: 20px;
-  color: #2613a4;
+  margin-top: 200px !important;
+  color: #1f178a;
+}
+
+.mainTitle {
+  font-size: 1.4em;
+  color: #93BEDF;
+  text-align: left;
+  margin: 0;
+  font-family: 'Poppins', sans-serif; 
+}
+
+.subTitle {
+  font-size: 2em;
+  color: #4C6085;
+  font-weight: bold;
+  text-align: left;
+  margin: 0;
+  line-height: 1;
+  font-family: 'Poppins', sans-serif; 
 }
 
 .subtitle {
-  font-size: 1.1em;
-  color: #6a6a6a;
+  font-size: 0.9em;
+  color: #6A6F75;
+  text-align: left;
   margin-top: 10px;
-  line-height: 1.4;
-  margin-bottom: 30px;
+  max-width: 600px;
+  line-height: 1.5;
+  font-family: 'Poppins', sans-serif; 
+}
+
+.button {
+  background-color: #4C6085;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.button:hover {
+  background-color: #93BEDF;
 }
 
 .buttonsContainer {
   display: flex;
-  flex-direction: column;
-  gap: 15px;
+  gap: 10px;
+  justify-content: flex-start;
+  margin-top: 20px;
+}
+
+.imageContainer {
+  display: flex;
+  justify-content: center;
   align-items: center;
+  margin-top: -220px;
+  margin-right: -600px;
 }
 
-.button {
-  padding: 10px 20px;
-  font-size: 1em;
-  color: white;
-  background-color: #2613a4;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  width: 200px;
+.imageContainer img {
+  width: 500px;  /* קביעת גודל התמונה */
+  height: 300px;
+  border-radius: 10px;  /* פינות מעוגלות לתמונה */
 }
 
-.button:hover {
-  background-color: #1e0f87;
+body {
+  background: linear-gradient(to bottom, #ffffff, #ffffff);
+  font-family: 'Poppins', sans-serif; 
+  margin: 0;
 }
 
-@media (max-width: 600px) {
-  .headline {
-    font-size: 2em;
-  }
-
-  .subtitle {
-    font-size: 1em;
-  }
-
-  .button {
-    width: 100%;
-  }
+header {
+  border-bottom: 2px solid #ddd;
+  margin-bottom: 50px;
 }
-
