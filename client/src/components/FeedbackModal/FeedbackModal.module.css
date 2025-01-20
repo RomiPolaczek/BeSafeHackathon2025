@@ -33,6 +33,7 @@
     border-radius: 5px;
     transition: background-color 0.3s ease;
     width: 45%; /* Controls button width, you can adjust it as needed */
+    margin-left: 10px;
 
 }
 
