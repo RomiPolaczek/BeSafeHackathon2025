@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url';
 import multer from 'multer';
 import fs from 'fs';
 import webpush from 'web-push';
-import { checkMessageContent } from './utils/contentChecker.js'; // Adjust the path as necessary
+import { checkContentSafety } from './utils/contentChecker.js'; // Adjust the path as necessary
 import { messageHistory } from './data/chatData.js';
 
 
@@ -136,7 +136,23 @@ app.get('/api/messages', authenticateToken, (req, res) => {
   }
 });
 
-app.post('/api/upload', authenticateToken, upload.single('image'), (req, res) => {
+app.post('/api/upload', authenticateToken, upload.single('image'), async (req, res) => {
+  // if (req.file) {
+  //   const imageUrl = `./uploads/${req.file.filename}`;
+  //   const isSafe = await checkContentSafety({ content: imageUrl, type: 'image' }); 
+  //   if (isSafe) {
+  //     console.log('Uploaded image contains safe content.');
+  //     res.json({ imageUrl });
+  //   } else {
+  //     // Delete the unsafe image
+  //     fs.unlinkSync(path.join(uploadsDir, req.file.filename));
+  //     return;
+  //     // res.status(400).json({ message: 'Uploaded image contains unsafe content.' });
+  //   }
+  // }
+  // // res.status(400).json({ message: 'Uploaded image contains unsafe content.' });
+  // return;
+
   if (req.file) {
     const imageUrl = `/uploads/${req.file.filename}`;
     res.json({ imageUrl });
@@ -167,42 +183,44 @@ io.on('connection', (socket) => {
   socket.join(socket.user.id.toString());
 
 
-  socket.on('chat message', async (msg) => {
-    const isSafe =  await checkMessageContent(msg.content);
+  socket.on('chat message', async (input) => {
+
+    console.log('The input: ', input.content , ' the type:', input.type);
+    const isSafe =  await checkContentSafety(input, input.type);
 
     if(isSafe){
-      console.log('The message: "', msg.content, '" is safe');
+      console.log('The message: "', input, '" is safe');
 
-      const conversationId = getConversationId(socket.user.id, msg.recipientId);
+      const conversationId = getConversationId(socket.user.id, input.recipientId);
       if (!conversations.has(conversationId)) {
         conversations.set(conversationId, {
         id: conversationId,
-        participants: [socket.user.id, msg.recipientId],
+        participants: [socket.user.id, input.recipientId],
         messages: []
         });
       }
       const message = {
         id: Date.now(),
         senderId: socket.user.id,
-        recipientId: msg.recipientId,
-        content: msg.content,
-        type: msg.type,
+        recipientId: input.recipientId,
+        content: input.content,
+        type: input.type,
         timestamp: new Date()
       };
 
-      messageHistory.push(message);  
-      conversations.get(conversationId).messages.push(message);
-      io.to(msg.recipientId.toString()).emit('chat message', message);
+      messageHistory.push(input);  
+      conversations.get(conversationId).messages.push(input);
+      io.to(input.recipientId.toString()).emit('chat message', input);
 
       // Send success feedback (even if message is safe)
       socket.emit('message feedback', { success: true });
 
     } else {
       // if the message is not safe - don't send it and display feedback:
-      console.log('The message: "', msg.content, '" is not safe');
+      console.log('The message: "', input, '" is not safe');
 
       // Send feedback to the client about the unsafe message
-      socket.emit('message feedback', { success: false, message:
+      socket.emit('message feedback', { success: false, input:
             'Your message contains content that may be harmful, to yourself or to others.' });
     }
 
