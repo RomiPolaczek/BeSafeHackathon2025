@@ -10,7 +10,6 @@ import MessageList from '../../components/MessageList/MessageList';
 import LastSeen from '../../components/LastSeen/LastSeen';
 import styles from './ChatPage.module.css';
 import FeedbackModal from "@/components/FeedbackModal/FeedbackModal";
-import emailjs from '@emailjs/browser';
 
 const ChatPage = () => {
   const [selectedConversation, setSelectedConversation] = useState(null);
@@ -26,6 +25,7 @@ const ChatPage = () => {
   const typingTimeoutRef = useRef(null);
   const [isEmailClicked, setIsEmailClicked] = useState(true);
   const [ClearMessage,setClearMessage] = useState(false);
+  const [messageContent, setMessageContent] = useState(''); // State to store message content
 
   const closeFeedbackModal = () => {
     setIsFeedbackModalOpen(false);
@@ -38,13 +38,12 @@ const ChatPage = () => {
 
   };
 
-  const handleEmailTrustedAdult = async () => {
+  const handleEmailTrustedAdult = async (messageContent) => {
     const emailBody = `
     Hello,
     Your child sent a concerning message in SafeChat, and we wanted to let you know.
     This is the message:
     Message: ${messageContent}
-    Feedback: ${feedback}
   `;
 
     try {
@@ -186,6 +185,7 @@ const ChatPage = () => {
           timestamp: new Date()
         };
 
+        setMessageContent(content); // Store the message content here
 
 
         socket.emit('chat message', messageData);
@@ -323,7 +323,9 @@ const ChatPage = () => {
                 isOpen={isFeedbackModalOpen}
                 feedback={feedback}
                 onClose={closeFeedbackModal}
-                onEmailTrustedAdult={handleEmailTrustedAdult}
+                // onEmailTrustedAdult={handleEmailTrustedAdult}
+                onEmailTrustedAdult={() => handleEmailTrustedAdult(messageContent)}  // Pass messageContent to the email handler
+
             />
 
           </>
