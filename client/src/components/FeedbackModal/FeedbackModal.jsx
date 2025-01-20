@@ -10,7 +10,7 @@ const FeedbackModal = ({ isOpen, feedback, onClose, onEmailTrustedAdult }) => {
                 <h2>Are you sure about that?</h2>
                 <p>Your message contains content that may be harmful, to yourself or to others.</p>
                 <button onClick={onClose} className={styles.closeButton}>I get it! I'll write something else</button>
-                <button className={styles.emailButton} onClick={onEmailTrustedAdult}>I'm okay, thanks</button>
+                <button className={styles.emailButton} onClick={onEmailTrustedAdult}>I'd like to ask an adult</button>
             </div>
         </div>
     );
