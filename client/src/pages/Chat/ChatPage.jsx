@@ -25,7 +25,7 @@ const ChatPage = () => {
   const typingTimeoutRef = useRef(null);
   const [isButtonClicked, setIsButtonClicked] = useState(false);
   const [ClearMessage,setClearMessage] = useState(false);
-  const [messageContent, setMessageContent] = useState(''); // State to store message content
+  const [messageContent, setMessageContent] = useState({}); // State to store message content
 
   const closeFeedbackModal = () => {
     setIsFeedbackModalOpen(false);
@@ -39,12 +39,12 @@ const ChatPage = () => {
 
   };
 
-  const handleEmailTrustedAdult = async (messageContent) => {
+  const handleEmailTrustedAdult = async () => {
     const emailBody = `
     Hello,
     Your child sent a concerning message in SafeChat, and we wanted to let you know.
     This is the message:
-    Message: ${messageContent}
+    ${messageContent.content}
   `;
 
     try {
@@ -61,10 +61,12 @@ const ChatPage = () => {
       console.error('Error sending email:', error);
       alert('Failed to send email');
     }
-    setClearMessage(false); // Clear the message
+    setMessages(prevMessages => [...prevMessages, messageContent]);
+    updateConversations(messageContent);
+    setIsButtonClicked(true);
+    setClearMessage(false); // DON'T Clear the message
     setIsFeedbackModalOpen(false); // Close modal
     setFeedback(''); // Clear feedback
-    setIsButtonClicked(true);
   };
 
 // Create a function to simulate waiting for feedback modal to close
@@ -213,7 +215,7 @@ const ChatPage = () => {
           timestamp: new Date()
         };
 
-        setMessageContent(content); // Store the message content here
+        setMessageContent(messageData); // Store the message content here
 
 
         socket.emit('chat message', messageData);
@@ -444,7 +446,7 @@ const ChatPage = () => {
                 feedback={feedback}
                 onClose={closeFeedbackModal}
                 // onEmailTrustedAdult={handleEmailTrustedAdult}
-                onEmailTrustedAdult={() => handleEmailTrustedAdult(messageContent)}  // Pass messageContent to the email handler
+                onEmailTrustedAdult={() => handleEmailTrustedAdult()}  // Pass messageContent to the email handler
 
             />
 
