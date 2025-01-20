@@ -23,23 +23,68 @@ const ChatPage = () => {
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false); // for the UI content check modal
   const messageListRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const [isEmailClicked, setIsEmailClicked] = useState(true);
+  const [ClearMessage,setClearMessage] = useState(false);
+  const [messageContent, setMessageContent] = useState(''); // State to store message content
 
   const closeFeedbackModal = () => {
     setIsFeedbackModalOpen(false);
+    // setClearMessage(true);
     setFeedback('');
+    if (feedback) {
+      setClearMessage(true); // Only set ClearMessage to true if feedback exists
+    }
+    setFeedback('');
+
   };
 
-  const handleEmailTrustedAdult = () => {
+  const handleEmailTrustedAdult = async (messageContent) => {
     const emailBody = `
     Hello,
-    I need to report a concerning message in a chat. Please help me review it.
-    Feedback: ${feedback}
+    Your child sent a concerning message in SafeChat, and we wanted to let you know.
+    This is the message:
+    Message: ${messageContent}
   `;
 
-    //  adjust the recipient email address as needed.
-    const mailtoLink = `mailto:trustedadult@example.com?subject=Chat Message Feedback&body=${encodeURIComponent(emailBody)}`;
-    window.location.href = mailtoLink;  // Opens the email client
+    try {
+      await axios.post('http://localhost:3001/send-email', {
+        recipientEmail: 'safechat71@gmail.com', // TODO: Replace with the actual recipient email
+        subject: 'SafeChat Alert',
+        body: emailBody,
+      });
+
+
+
+      alert('Email sent successfully');
+    } catch (error) {
+      console.error('Error sending email:', error);
+      alert('Failed to send email');
+    }
+
+    setIsFeedbackModalOpen(false); // Close modal
+    setFeedback(''); // Clear feedback
+    setClearMessage(false); // Clear the message
   };
+
+
+
+  // const handleEmailTrustedAdult = () => {
+  //   const emailBody = `
+  //   Hello,
+  //   Your child sent a concerning message in SafeChat, and we wanted to let you know.
+  //   This is the message: ${message}
+  //   Feedback: ${feedback}
+  // `;
+  //   //  adjust the recipient email address as needed.
+  //   const mailtoLink = `mailto:trustedadult@example.com?subject=Chat Message Feedback&body=${encodeURIComponent(emailBody)}`;
+  //   window.location.href = mailtoLink;  // Opens the email client
+  //   setIsFeedbackModalOpen(false);  // close modal
+  //   setFeedback('');
+  //   setClearMessage(false);
+  //
+  //
+  //
+  // };
 
 
 
@@ -140,6 +185,7 @@ const ChatPage = () => {
           timestamp: new Date()
         };
 
+        setMessageContent(content); // Store the message content here
 
 
         socket.emit('chat message', messageData);
@@ -152,16 +198,38 @@ const ChatPage = () => {
 
         // Wait for the feedback from the server (message safety check)
         socket.once('message feedback', (data) => {
-          if (data.success) {
-            // If the message is safe, add it locally
-            setMessages(prevMessages => [...prevMessages, messageData]);
-            updateConversations(messageData);
-          } else {
-            // If the message is unsafe, display feedback and do not add it
-            // TODO: if we want the person to be able to change their response, this should change.
-            setFeedback(data.message); // Set feedback message
-            setIsFeedbackModalOpen(true); // Open feedback modal
+          if (!data.success) {
+              setFeedback(data.message); // Set feedback message
+              setIsFeedbackModalOpen(true); // Open feedback modal
           }
+          console.log(ClearMessage,"clearmessage");
+
+
+          if (!ClearMessage) {
+              setMessages(prevMessages => [...prevMessages, messageData]);
+              updateConversations(messageData);
+          } else {
+            setClearMessage(false);
+          }
+
+          // if (data.success) {
+          //   // If the message is safe or the user clicked "Send Email," add it locally
+          //   // setMessages(prevMessages => [...prevMessages, messageData]);
+          //   // updateConversations(messageData);
+          //   // // Reset the email action state
+          //   // setIsEmailClicked(false);
+          // } else {
+          //   // If the message is unsafe, display feedback and do not add it
+          //   // TODO: if we want the person to be able to change their response, this should change.
+          //   setFeedback(data.message); // Set feedback message
+          //   setIsFeedbackModalOpen(true); // Open feedback modal
+          // }
+          // if (isEmailClicked) {
+          //   setMessages(prevMessages => [...prevMessages, messageData]);
+          //   updateConversations(messageData);
+          //   setIsEmailClicked(false);
+          //
+          // }
         });
 
           // Clear the feedback after sending the message
@@ -255,7 +323,9 @@ const ChatPage = () => {
                 isOpen={isFeedbackModalOpen}
                 feedback={feedback}
                 onClose={closeFeedbackModal}
-                onEmailTrustedAdult={handleEmailTrustedAdult}
+                // onEmailTrustedAdult={handleEmailTrustedAdult}
+                onEmailTrustedAdult={() => handleEmailTrustedAdult(messageContent)}  // Pass messageContent to the email handler
+
             />
 
           </>
