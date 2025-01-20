@@ -1,5 +1,5 @@
 .chatContainer {
-  margin-top: 40px;
+  margin-top: 20px;
   display: flex;
   height: calc(100vh - 60px); /* Adjust based on your header height */
   background-color: #f0f2f5;

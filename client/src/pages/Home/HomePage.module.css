@@ -7,12 +7,14 @@
 .headline {
   font-size: 2.5em;
   margin-bottom: 20px;
-  margin-top: 200px !important;
+  /* margin-top: 600px !important; */
   color: #1f178a;
 }
 
 .mainTitle {
-  font-size: 1.4em;
+  margin-top: 150px !important;
+
+  font-size: 2.5em;
   color: #93BEDF;
   text-align: left;
   margin: 0;
@@ -20,7 +22,7 @@
 }
 
 .subTitle {
-  font-size: 2em;
+  font-size: 5em;
   color: #4C6085;
   font-weight: bold;
   text-align: left;
@@ -30,7 +32,7 @@
 }
 
 .subtitle {
-  font-size: 0.9em;
+  font-size: 1.0em;
   color: #6A6F75;
   text-align: left;
   margin-top: 10px;
@@ -65,13 +67,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: -220px;
-  margin-right: -600px;
+  margin-top: -300px;
+  margin-right: -700px;
 }
 
 .imageContainer img {
-  width: 500px;  /* קביעת גודל התמונה */
-  height: 300px;
+  width: 700px;  /* קביעת גודל התמונה */
+  height: 400px;
   border-radius: 10px;  /* פינות מעוגלות לתמונה */
 }
 

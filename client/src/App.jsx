@@ -32,7 +32,7 @@ const Header = styled.header`
   padding: 10px 5px 10px 5px;
 
   width: 100%;
-
+  height: 30px;
   position: fixed;
   margin: 0;
   color: white;
@@ -59,9 +59,16 @@ const NavLink = styled(Link)`
 `;
 
 const Main = styled.main`
-  padding: 20px;
+  padding: 50px 20px 20px;
   
 `;
+
+const Logo = styled.img`
+  width: 70px; /* הגדרת גודל התמונה */
+  height: auto;
+  margin-left: 20px; /* מרווח בין התמונה לשאר האלמנטים */
+`;
+
 
 const Footer = styled.footer`
  background-color: #4C6085;
