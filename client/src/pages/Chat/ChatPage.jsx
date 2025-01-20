@@ -23,27 +23,28 @@ const ChatPage = () => {
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false); // for the UI content check modal
   const messageListRef = useRef(null);
   const typingTimeoutRef = useRef(null);
-  const [isEmailClicked, setIsEmailClicked] = useState(true);
+  const [isButtonClicked, setIsButtonClicked] = useState(false);
   const [ClearMessage,setClearMessage] = useState(false);
-  const [messageContent, setMessageContent] = useState(''); // State to store message content
+  const [messageContent, setMessageContent] = useState({}); // State to store message content
 
   const closeFeedbackModal = () => {
     setIsFeedbackModalOpen(false);
-    // setClearMessage(true);
+    setClearMessage(true);
     setFeedback('');
-    if (feedback) {
-      setClearMessage(true); // Only set ClearMessage to true if feedback exists
-    }
-    setFeedback('');
+    setIsButtonClicked(true);
+    // if (feedback) {
+    //   setClearMessage(true); // Only set ClearMessage to true if feedback exists
+    // }
+    // setFeedback('');
 
   };
 
-  const handleEmailTrustedAdult = async (messageContent) => {
+  const handleEmailTrustedAdult = async () => {
     const emailBody = `
     Hello,
     Your child sent a concerning message in SafeChat, and we wanted to let you know.
     This is the message:
-    Message: ${messageContent}
+    ${messageContent.content}
   `;
 
     try {
@@ -60,12 +61,40 @@ const ChatPage = () => {
       console.error('Error sending email:', error);
       alert('Failed to send email');
     }
-
+    setMessages(prevMessages => [...prevMessages, messageContent]);
+    updateConversations(messageContent);
+    setIsButtonClicked(true);
+    setClearMessage(false); // DON'T Clear the message
     setIsFeedbackModalOpen(false); // Close modal
     setFeedback(''); // Clear feedback
-    setClearMessage(false); // Clear the message
   };
 
+// Create a function to simulate waiting for feedback modal to close
+  const waitForFeedbackModalClose = () => {
+    return new Promise((resolve) => {
+      const checkModal = () => {
+        if (isButtonClicked) {
+          resolve(true);
+        } else {
+          requestAnimationFrame(checkModal);
+        }// Check if modal is closed
+      };
+      checkModal();
+    });
+  };
+
+
+  //     const interval = setInterval(() => {
+  //         if (isButtonClicked) { // Check if modal is closed
+  //           console.log('checking feedbackmodal',isButtonClicked);
+  //           // if (!isFeedbackModalOpen) { // Check if modal is closed
+  //         // console.log('checking feedbackmodal',isFeedbackModalOpen);
+  //         clearInterval(interval); // Stop checking
+  //         resolve(isButtonClicked); // Resolve the promise
+  //       }
+  //     }, 100); // Check every 100ms
+  //   });
+  // };
 
 
   // const handleEmailTrustedAdult = () => {
@@ -173,6 +202,7 @@ const ChatPage = () => {
     fetchMessages();
   }, [fetchMessages]);
 
+
   const handleSendMessage = async (content, type) => {
     if (content && selectedConversation) {
       try {
@@ -185,32 +215,107 @@ const ChatPage = () => {
           timestamp: new Date()
         };
 
-        setMessageContent(content); // Store the message content here
+        setMessageContent(messageData); // Store the message content here
 
 
         socket.emit('chat message', messageData);
         socket.emit('stop typing', selectedConversation.id);
 
-        // Add message locally
-        // setMessages(prevMessages => [...prevMessages, messageData]);
-        // updateConversations(messageData);
+        // splitted:
+        // // // Wait for the feedback from the server (message safety check)
+        // socket.once('message feedback', (data) => {
+        //   if (!data.success) {
+        //     setFeedback(data.message); // Set feedback message
+        //   }
+        // });
+        //
+        // if (feedback) {
+        //   setIsFeedbackModalOpen(true); // Open feedback modal
+        //   // Wait for the modal to be closed or some action to be taken
+        //   await waitForFeedbackModalClose();  // Wait for the feedback modal to be closed
+        //   // After modal close, check ClearMessage
+        //   if (!ClearMessage) {
+        //     console.log("in the clear if");
+        //     setMessages(prevMessages => [...prevMessages, messageData]);
+        //     updateConversations(messageData);
+        //   } else {
+        //     setClearMessage(false);
+        //   }
+        // } else {
+        //   setMessages(prevMessages => [...prevMessages, messageData]);
+        //   updateConversations(messageData);
+        // }
+
+        const feedbackPromise = new Promise((resolve) => {
+            socket.once('message feedback', async (data) => {
+              if (!data.success) {
+                setFeedback(data.message); // Set feedback message
+                setIsFeedbackModalOpen(true); // Open feedback modal
+
+                const userConfirmed = await waitForFeedbackModalClose();
+                if (!ClearMessage && userConfirmed) {
+                  resolve(true);
+                } else {
+                  resolve(false);
+                }
+              } else {
+                resolve(true);
+              }
+              });
+      });
+        const shouldSend = await feedbackPromise;
+
+        if (shouldSend) {
+          setMessages(prevMessages => [...prevMessages, messageData]);
+          updateConversations(messageData);
+        }
+        setFeedback('');
+        setIsButtonClicked(false);
+        setClearMessage(false);
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
+    }
+  };
 
 
-        // Wait for the feedback from the server (message safety check)
-        socket.once('message feedback', (data) => {
-          if (!data.success) {
-              setFeedback(data.message); // Set feedback message
-              setIsFeedbackModalOpen(true); // Open feedback modal
-          }
-          console.log(ClearMessage,"clearmessage");
-
-
-          if (!ClearMessage) {
-              setMessages(prevMessages => [...prevMessages, messageData]);
-              updateConversations(messageData);
-          } else {
-            setClearMessage(false);
-          }
+  // socket.once('message feedback', async (data) => {
+  //             if (!data.success) {
+  //               setFeedback(data.message); // Set feedback message
+  //               setIsFeedbackModalOpen(true); // Open feedback modal
+  //               // Wait for the modal to be closed or some action to be taken
+  //               const userchoice = await waitForFeedbackModalClose();
+  //                 // Wait for the feedback modal to be closed
+  //                 // After modal close, check ClearMessage = email was clicked?
+  //                 console.log("modal closed, clearmessage is:", ClearMessage);
+  //                 if (!ClearMessage && userchoice) {
+  //                   setMessages(prevMessages => [...prevMessages, messageData]);
+  //                   updateConversations(messageData);
+  //                 } else {
+  //                   // if clear message is true
+  //                   setClearMessage(false);
+  //                 }
+  //             } else {
+  //               setMessages(prevMessages => [...prevMessages, messageData]);
+  //               updateConversations(messageData);
+  //             }
+  //           });
+        //
+        // // Wait for the feedback from the server (message safety check)
+        // socket.once('message feedback', (data) => {
+        //   if (!data.success) {
+        //       setFeedback(data.message); // Set feedback message
+        //       setIsFeedbackModalOpen(true); // Open feedback modal
+        //   }
+        //   console.log(ClearMessage,"clearmessage");
+        //
+        //   if (!ClearMessage) {
+        //       console.log("in the clear if");
+        //       setMessages(prevMessages => [...prevMessages, messageData]);
+        //       updateConversations(messageData);
+        //   } else {
+        //     setClearMessage(false);
+        //   }
 
           // if (data.success) {
           //   // If the message is safe or the user clicked "Send Email," add it locally
@@ -230,15 +335,32 @@ const ChatPage = () => {
           //   setIsEmailClicked(false);
           //
           // }
-        });
+        // });
+  //
+  //         // Clear the feedback after sending the message
+  //       setFeedback('');
+  //       // restart the modal clicked flag
+  //       setIsButtonClicked(false);
+  //     } catch (error) {
+  //       console.error('Error sending message:', error);
+  //     }
+  //   }
+  // };
 
-          // Clear the feedback after sending the message
-        setFeedback('');
-      } catch (error) {
-        console.error('Error sending message:', error);
-      }
-    }
-  };
+  // Effect to handle when feedback modal is open
+  // useEffect(() => {
+  //   if (isFeedbackModalOpen) {
+  //     // After modal is open, check ClearMessage
+  //     if (!ClearMessage) {
+  //       console.log("in the clear if");
+  //       setMessages(prevMessages => [...prevMessages, messageData]);
+  //       updateConversations(messageData);
+  //     } else {
+  //       setClearMessage(false);
+  //     }
+  //   }
+  // }, [isFeedbackModalOpen]);
+
 
   const handleTyping = () => {
     if (selectedConversation && socket) {
@@ -324,7 +446,7 @@ const ChatPage = () => {
                 feedback={feedback}
                 onClose={closeFeedbackModal}
                 // onEmailTrustedAdult={handleEmailTrustedAdult}
-                onEmailTrustedAdult={() => handleEmailTrustedAdult(messageContent)}  // Pass messageContent to the email handler
+                onEmailTrustedAdult={() => handleEmailTrustedAdult()}  // Pass messageContent to the email handler
 
             />
 
