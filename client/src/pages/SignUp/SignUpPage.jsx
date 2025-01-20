@@ -8,6 +8,8 @@ const SignUpPage = () => {
   const { register } = useAuth();
   const [fullName, setFullName] = useState('');
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [securityEmail, setSecurityEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -26,8 +28,21 @@ const SignUpPage = () => {
       return;
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email) || !emailRegex.test(securityEmail)) {
+      setError('Please enter valid email addresses');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (email === securityEmail) {
+      setError('The security email must be different from your primary email');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      const success = await register(username, password, fullName);
+      const success = await register(username, password, fullName, email, securityEmail);
       if (success) {
         navigate('/main');
       } else {
@@ -63,6 +78,28 @@ const SignUpPage = () => {
             className={styles.input}
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+        </div>
+        <div className={styles.inputGroup}>
+          <label htmlFor="email" className={styles.label}>Your Email</label>
+          <input
+            id="email"
+            type="email"
+            className={styles.input}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div className={styles.inputGroup}>
+          <label htmlFor="securityEmail" className={styles.label}>Email of a trusted adult</label>
+          <input
+            id="securityEmail"
+            type="email"
+            className={styles.input}
+            value={securityEmail}
+            onChange={(e) => setSecurityEmail(e.target.value)}
             required
           />
         </div>
@@ -121,4 +158,3 @@ const SignUpPage = () => {
 };
 
 export default SignUpPage;
-
